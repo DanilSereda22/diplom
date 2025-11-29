@@ -1,15 +1,14 @@
 # apps/store/models.py
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
 
 def product_image_upload_to(instance, filename):
     return f"products/{instance.category.slug if instance.category else 'misc'}/{filename}"
 
+
 class Category(models.Model):
     name = models.CharField("Название", max_length=120)
     slug = models.SlugField("Slug", max_length=120, unique=True)
-    image = models.ImageField("Изображение", upload_to="categories/", blank=True, null=True)
 
     class Meta:
         verbose_name = "Категория"
@@ -19,12 +18,39 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("store:category_detail", args=[self.slug])
+        return reverse("store:category", args=[self.slug])
+
+
+class SubCategory(models.Model):
+    category = models.ForeignKey(
+        Category,
+        related_name="subcategories",
+        on_delete=models.CASCADE
+    )
+    name = models.CharField("Название подкатегории", max_length=100)
+    slug = models.SlugField(unique=True)
+
+    class Meta:
+        verbose_name = "Подкатегория"
+        verbose_name_plural = "Подкатегории"
+
+    def __str__(self):
+        return f"{self.category.name} → {self.name}"
+
+    def get_absolute_url(self):
+        return reverse("store:subcategory", args=[self.slug])
+
 
 class Product(models.Model):
     name = models.CharField("Название", max_length=255)
     slug = models.SlugField("Slug", max_length=255, unique=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
+
+    category = models.ForeignKey(
+        SubCategory,
+        on_delete=models.CASCADE,
+        related_name="products"
+    )
+
     description = models.TextField("Описание", blank=True)
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
     weight = models.PositiveIntegerField("Вес(г)", default=0)

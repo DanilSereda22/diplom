@@ -1,32 +1,57 @@
 # apps/store/views.py
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from .models import Category, Product
-from .forms import SearchForm
-from django.db import models
 from django.db.models import Q
 
-def index(request):
-    categories = Category.objects.all()
-    popular = Product.objects.filter(available=True).order_by("-created")[:8]
-    context = {"categories": categories, "popular": popular}
-    return render(request, "index.html", context)
+from .models import Category, SubCategory, Product
+from .forms import SearchForm
 
-def product_list(request, category_slug=None):
+
+def category_view(request, slug):
+    category = get_object_or_404(Category, slug=slug)
+
+    # товары всех подкатегорий
+    subcats = category.subcategories.all()
+    products = Product.objects.filter(category__in=subcats, available=True)
+
+    return render(request, "store/category.html", {
+        "category": category,
+        "products": products,
+        "subcategories": subcats,
+    })
+
+
+def subcategory_view(request, slug):
+    subcategory = get_object_or_404(SubCategory, slug=slug)
+
+    products = Product.objects.filter(category=subcategory, available=True)
+
+    return render(request, "store/subcategory.html", {
+        "subcategory": subcategory,
+        "products": products
+    })
+
+
+def product_list(request):
     form = SearchForm(request.GET or None)
-    qs = Product.objects.filter(available=True)
-    category = None
-    if category_slug:
-        category = get_object_or_404(Category, slug=category_slug)
-        qs = qs.filter(category=category)
+    products = Product.objects.filter(available=True)
+
     if form.is_valid():
         q = form.cleaned_data.get("q")
         if q:
-            qs = qs.filter(models.Q(name__icontains=q) | models.Q(description__icontains=q))
-    paginator = Paginator(qs, 12)
+            products = products.filter(
+                Q(name__icontains=q) | Q(description__icontains=q)
+            )
+
+    paginator = Paginator(products, 12)
     page = request.GET.get("page")
     products = paginator.get_page(page)
-    return render(request, "store/product_list.html", {"products": products, "category": category, "form": form})
+
+    return render(request, "store/product_list.html", {
+        "products": products,
+        "form": form,
+    })
+
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, available=True)

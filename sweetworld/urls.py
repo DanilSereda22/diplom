@@ -1,4 +1,3 @@
-# sweetworld/urls.py
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -7,12 +6,17 @@ from store import views as store_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", store_views.index, name="home"),
+
+    # Главная — список товаров
+    path("", store_views.product_list, name="home"),
+
     path("store/", include("store.urls")),
     path("cart/", include("cart.urls")),
     path("orders/", include("orders.urls")),
-    path("accounts/", include("users.urls")),  # регистрация, профиль
-    path("accounts/", include("django.contrib.auth.urls")),  # login/logout/password
+    
+    # users
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("users/", include("users.urls", namespace="users")),
 ]
 
 if settings.DEBUG:

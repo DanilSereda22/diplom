@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-semibold mb-4">Вход в аккаунт</h2>
+
+    {% if form.errors %}
+        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+            Неверное имя пользователя или пароль.
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label class="block mb-4">
+            <span class="block mb-1">Имя пользователя</span>
+            {{ form.username }}
+        </label>
+
+        <label class="block mb-4">
+            <span class="block mb-1">Пароль</span>
+            {{ form.password }}
+        </label>
+
+        <button class="w-full p-2 rounded text-white font-semibold"
+                style="background: var(--accent-pink);">
+            Войти
+        </button>
+    </form>
+
+    <p class="text-center mt-4 text-sm">
+        Нет аккаунта?
+        <a href="{% url 'users:register' %}" class="text-blue-600 underline">Зарегистрироваться</a>
+    </p>
+</div>
+
+{% endblock %}
