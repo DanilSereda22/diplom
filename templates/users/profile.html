@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-6 rounded">
+  <h2 class="text-2xl font-semibold mb-4">Профиль</h2>
+  <form method="post">{% csrf_token %}
+    <label>Имя
+      <input name="first_name" value="{{ user.first_name }}" class="w-full p-2 rounded border" />
+    </label>
+    <label class="mt-2">Фамилия
+      <input name="last_name" value="{{ user.last_name }}" class="w-full p-2 rounded border" />
+    </label>
+    <label class="mt-2">Телефон
+      <input name="phone" value="{{ user.phone }}" class="w-full p-2 rounded border" />
+    </label>
+    <label class="mt-2">Адрес
+      <textarea name="address" rows="3" class="w-full p-2 rounded border">{{ user.address }}</textarea>
+    </label>
+    <button class="mt-4 p-2 rounded" style="background: var(--mint);">Сохранить</button>
+  </form>
+
+  <h3 class="mt-6 font-semibold">История заказов</h3>
+  <ul>
+    {% for order in user.orders.all %}
+      <li class="py-2 border-b">
+        Заказ #{{ order.pk }} — {{ order.get_status_display }} — {{ order.created_at|date:"d.m.Y H:i" }} — {{ order.total_price }} ₽
+      </li>
+    {% empty %}
+      <li>Заказов пока нет.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

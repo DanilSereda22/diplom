@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Ваша корзина</h2>
+<div class="bg-white rounded p-4">
+  {% if cart.is_empty %}
+    <p>Корзина пуста.</p>
+    <a href="{% url 'store:product_list' %}" class="inline-block mt-4 p-2 rounded" style="background: var(--accent-blue);">В каталог</a>
+  {% else %}
+    <table class="w-full">
+      <thead class="text-left text-sm text-gray-600">
+        <tr>
+          <th>Товар</th>
+          <th>Цена</th>
+          <th>Кол-во</th>
+          <th>Итого</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart %}
+        <tr class="border-t">
+          <td class="py-3">
+            <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
+          </td>
+          <td>{{ item.price }} ₽</td>
+          <td>
+            <form action="{% url 'cart:cart_add' item.product.pk %}" method="post" class="inline-block">
+              {% csrf_token %}
+              <input type="hidden" name="override" value="true" />
+              <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="w-16 p-1 rounded border" />
+              <button class="px-2 py-1 rounded ml-2">Обновить</button>
+            </form>
+          </td>
+          <td>{{ item.total_price }} ₽</td>
+          <td>
+            <form action="{% url 'cart:cart_remove' item.product.pk %}" method="post">
+              {% csrf_token %}
+              <button class="px-2 py-1 rounded" style="background: #FFD1DC;">Удалить</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="mt-4 flex justify-between items-center">
+      <div>
+        <strong>Итого: </strong> {{ cart.get_total_price }} ₽
+      </div>
+      <div class="flex gap-2">
+        <a href="{% url 'store:product_list' %}" class="p-2 rounded">Продолжить покупки</a>
+        <a href="{% url 'orders:checkout' %}" class="p-2 rounded" style="background: var(--mint);">Оформить заказ</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">
+  {% if category %}Категория: {{ category.name }}{% else %}Каталог{% endif %}
+</h2>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  {% for product in products %}
+  <div class="bg-white p-3 rounded-lg">
+    <a href="{{ product.get_absolute_url }}">
+      {% if product.image %}
+      <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-36 w-full object-cover rounded">
+      {% else %}
+      <div class="h-36 w-full bg-gray-100 rounded flex items-center justify-center text-gray-400">Нет изображения</div>
+      {% endif %}
+      <h3 class="mt-2 font-medium">{{ product.name }}</h3>
+      <div class="text-sm text-gray-600">{{ product.price }} ₽</div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="mt-6">
+  {% if products.has_other_pages %}
+    <div class="flex gap-2">
+      {% if products.has_previous %}
+        <a href="?page={{ products.previous_page_number }}" class="px-3 py-1 rounded bg-white">Назад</a>
+      {% endif %}
+      <span class="px-3 py-1 rounded bg-white">Страница {{ products.number }} из {{ products.paginator.num_pages }}</span>
+      {% if products.has_next %}
+        <a href="?page={{ products.next_page_number }}" class="px-3 py-1 rounded bg-white">Вперед</a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded">
+  <h2 class="text-2xl font-semibold mb-4">Регистрация</h2>
+  <form method="post">{% csrf_token %}
+    {% for field in form %}
+      <label class="block mb-3">
+        {{ field.label_tag }}
+        {{ field }}
+        {{ field.errors }}
+      </label>
+    {% endfor %}
+    <button class="w-full p-2 rounded" style="background: var(--accent-pink);">Зарегистрироваться</button>
+  </form>
+</div>
+{% endblock %}

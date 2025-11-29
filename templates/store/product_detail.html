@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="md:col-span-2 bg-white p-4 rounded-lg">
+    {% if product.image %}
+      <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover rounded">
+    {% else %}
+      <div class="w-full h-96 bg-gray-100 rounded flex items-center justify-center text-gray-400">Нет изображения</div>
+    {% endif %}
+  </div>
+
+  <aside class="bg-white p-4 rounded-lg">
+    <h2 class="text-2xl font-semibold">{{ product.name }}</h2>
+    <p class="text-lg text-gray-700 mt-2">{{ product.price }} ₽</p>
+    <p class="mt-4"><strong>Вес:</strong> {{ product.weight }} г</p>
+    <form action="{% url 'cart:cart_add' product.pk %}" method="post" class="mt-4">
+      {% csrf_token %}
+      <label class="block mb-2">Количество
+        <input type="number" name="quantity" value="1" min="1" class="w-full p-2 rounded border mt-1" />
+      </label>
+      <button type="submit" class="w-full p-2 rounded mt-2" style="background: var(--accent-pink);">Добавить в корзину</button>
+    </form>
+  </aside>
+</div>
+
+<div class="mt-6 bg-white p-4 rounded-lg">
+  <h3 class="font-semibold">Описание</h3>
+  <p class="text-sm text-gray-700 whitespace-pre-line">{{ product.description }}</p>
+</div>
+{% endblock %}

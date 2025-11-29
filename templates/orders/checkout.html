@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Оформление заказа</h2>
+
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="bg-white p-4 rounded">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="grid gap-2">
+        {% for field in form %}
+          <label class="block">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <small class="text-gray-500">{{ field.help_text }}</small>
+            {% endif %}
+            {{ field.errors }}
+          </label>
+        {% endfor %}
+      </div>
+      <button type="submit" class="mt-4 w-full p-2 rounded" style="background: var(--accent-pink);">Подтвердить заказ</button>
+    </form>
+  </div>
+
+  <aside class="bg-white p-4 rounded">
+    <h3 class="font-semibold">Ваши товары</h3>
+    <ul>
+      {% for item in cart %}
+      <li class="flex justify-between py-2 border-b">
+        <span>{{ item.product.name }} x{{ item.quantity }}</span>
+        <span>{{ item.total_price }} ₽</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="mt-4">
+      <strong>Итого: {{ cart.get_total_price }} ₽</strong>
+    </div>
+  </aside>
+</div>
+{% endblock %}
