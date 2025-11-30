@@ -1,41 +1,69 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2 class="text-2xl font-semibold mb-4">Оформление заказа</h2>
+<div class="max-w-5xl mx-auto">
+  <h2 class="text-3xl font-bold mb-8 text-gray-800">Оформление заказа</h2>
 
-<div class="grid md:grid-cols-2 gap-6">
-  <div class="bg-white p-4 rounded">
-    <form method="post">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <div class="grid gap-2">
-        {% for field in form %}
-          <label class="block">
-            {{ field.label_tag }}
-            {{ field }}
-            {% if field.help_text %}
-              <small class="text-gray-500">{{ field.help_text }}</small>
-            {% endif %}
-            {{ field.errors }}
-          </label>
-        {% endfor %}
-      </div>
-      <button type="submit" class="mt-4 w-full p-2 rounded" style="background: var(--accent-pink);">Подтвердить заказ</button>
-    </form>
-  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+    
+    <div>
+        <form action="." method="post" id="checkout-form">
+            {% csrf_token %}
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+                <h3 class="font-bold text-lg mb-2">Контактные данные</h3>
+                
+                {% for field in form %}
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1 pl-1">{{ field.label }}</label>
+                    <input type="{{ field.field.widget.input_type }}" 
+                           name="{{ field.name }}" 
+                           id="{{ field.id_for_label }}"
+                           value="{{ field.value|default:'' }}"
+                           class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-pink-300 focus:ring-4 focus:ring-pink-100 outline-none transition-all">
+                    {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1 ml-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
 
-  <aside class="bg-white p-4 rounded">
-    <h3 class="font-semibold">Ваши товары</h3>
-    <ul>
-      {% for item in cart %}
-      <li class="flex justify-between py-2 border-b">
-        <span>{{ item.product.name }} x{{ item.quantity }}</span>
-        <span>{{ item.total_price }} ₽</span>
-      </li>
-      {% endfor %}
-    </ul>
-    <div class="mt-4">
-      <strong>Итого: {{ cart.get_total_price }} ₽</strong>
+            <button type="submit" class="w-full mt-6 bg-gray-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-pink-500 shadow-xl shadow-pink-100 hover:shadow-pink-200 transition-all transform hover:-translate-y-1">
+                Подтвердить заказ
+            </button>
+        </form>
     </div>
-  </aside>
+
+    <div>
+        <div class="bg-gray-50 p-6 rounded-3xl border border-dashed border-gray-300 sticky top-24">
+            <h3 class="font-bold text-lg mb-4">Ваш заказ</h3>
+            <ul class="space-y-3 mb-6">
+                {% for item in cart %}
+                <li class="flex justify-between items-center text-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1 border border-gray-100">
+                             {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" class="w-full h-full object-contain">
+                             {% endif %}
+                        </div>
+                        <span class="text-gray-700 font-medium">{{ item.product.name }} <span class="text-gray-400">x{{ item.quantity }}</span></span>
+                    </div>
+                    <span class="font-bold text-gray-800">{{ item.total_price }} ₽</span>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            <div class="border-t border-gray-200 pt-4 flex justify-between items-center text-xl font-extrabold text-gray-900">
+                <span>Итого к оплате:</span>
+                <span>{{ cart.get_total_price }} ₽</span>
+            </div>
+            
+            <div class="mt-4 flex items-start gap-2 text-xs text-gray-500 bg-white p-3 rounded-xl">
+                 <span>🔒</span>
+                 <p>Ваши данные надежно защищены. Оплата происходит при получении или через защищенный шлюз.</p>
+            </div>
+        </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

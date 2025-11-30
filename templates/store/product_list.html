@@ -1,36 +1,93 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h2 class="text-2xl font-semibold mb-4">
-  {% if category %}Категория: {{ category.name }}{% else %}Каталог{% endif %}
-</h2>
+<div class="flex flex-col md:flex-row gap-8">
 
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-  {% for product in products %}
-  <div class="bg-white p-3 rounded-lg">
-    <a href="{{ product.get_absolute_url }}">
-      {% if product.image %}
-      <img src="{{ product.image.url }}" alt="{{ product.name }}" class="h-36 w-full object-cover rounded">
-      {% else %}
-      <div class="h-36 w-full bg-gray-100 rounded flex items-center justify-center text-gray-400">Нет изображения</div>
-      {% endif %}
-      <h3 class="mt-2 font-medium">{{ product.name }}</h3>
-      <div class="text-sm text-gray-600">{{ product.price }} ₽</div>
-    </a>
-  </div>
-  {% endfor %}
-</div>
+  <aside class="w-full md:w-1/4 space-y-6">
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
+      <h3 class="text-xl font-bold mb-4 text-gray-800">Категории</h3>
+      <ul class="space-y-2">
+        <li>
+            <a href="{% url 'store:product_list' %}" class="block px-4 py-2 rounded-xl {% if not category %}bg-pink-50 text-pink-600 font-bold{% else %}text-gray-600 hover:bg-gray-50{% endif %} transition">
+                Все сладости
+            </a>
+        </li>
+        {% for cat in categories %}
+        <li>
+          <a href="{{ cat.get_absolute_url }}" 
+             class="flex items-center justify-between px-4 py-2 rounded-xl transition group {% if category and category.slug == cat.slug %}bg-pink-50 text-pink-600 font-bold{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+            <span>{{ cat.name }}</span>
+            <span class="text-xs bg-white border border-gray-200 px-2 py-0.5 rounded-full text-gray-400 group-hover:border-pink-200 group-hover:text-pink-400 transition">
+                {{ cat.products.count }}
+            </span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </aside>
 
-<div class="mt-6">
-  {% if products.has_other_pages %}
-    <div class="flex gap-2">
+  <div class="w-full md:w-3/4">
+    
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">
+            {% if category %}{{ category.name }}{% else %}Все товары{% endif %}
+        </h2>
+        <span class="text-gray-400 text-sm">Найдено: {{ products.paginator.count }}</span>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for product in products %}
+      <div class="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col border border-gray-100 hover:border-pink-200 hover:-translate-y-1 overflow-hidden">
+        <a href="{{ product.get_absolute_url }}" class="flex flex-col h-full p-4">
+          
+          <div class="relative aspect-square w-full bg-gray-50 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
+             {% if product.image %}
+                <img src="{{ product.image.url }}" 
+                     alt="{{ product.name }}" 
+                     class="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-500 ease-out">
+             {% else %}
+                <span class="text-4xl opacity-20">🍬</span>
+             {% endif %}
+          </div>
+
+          <div class="mt-auto">
+              <h3 class="font-bold text-gray-800 leading-tight mb-2 group-hover:text-pink-600 transition-colors">
+                  {{ product.name }}
+              </h3>
+              <div class="flex items-center justify-between">
+                  <span class="text-lg font-extrabold text-gray-900">{{ product.price }} ₽</span>
+                  <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-pink-500 hover:text-white transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                  </button>
+              </div>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+        <div class="col-span-full py-12 text-center text-gray-400">
+            <div class="text-6xl mb-4">🕵️‍♀️</div>
+            <p>Товары не найдены.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if products.has_other_pages %}
+    <div class="mt-10 flex justify-center gap-2">
       {% if products.has_previous %}
-        <a href="?page={{ products.previous_page_number }}" class="px-3 py-1 rounded bg-white">Назад</a>
+        <a href="?page={{ products.previous_page_number }}" class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:border-pink-300 hover:text-pink-600 transition">←</a>
       {% endif %}
-      <span class="px-3 py-1 rounded bg-white">Страница {{ products.number }} из {{ products.paginator.num_pages }}</span>
+      
+      <span class="px-4 py-2 rounded-xl bg-pink-500 text-white font-bold shadow-md shadow-pink-200">
+          {{ products.number }}
+      </span>
+
       {% if products.has_next %}
-        <a href="?page={{ products.next_page_number }}" class="px-3 py-1 rounded bg-white">Вперед</a>
+        <a href="?page={{ products.next_page_number }}" class="px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-600 hover:border-pink-300 hover:text-pink-600 transition">→</a>
       {% endif %}
     </div>
-  {% endif %}
+    {% endif %}
+
+  </div>
 </div>
 {% endblock %}

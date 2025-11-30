@@ -1,30 +1,75 @@
 {% extends "base.html" %}
+
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-  <div class="md:col-span-2 bg-white p-4 rounded-lg">
-    {% if product.image %}
-      <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-96 object-cover rounded">
-    {% else %}
-      <div class="w-full h-96 bg-gray-100 rounded flex items-center justify-center text-gray-400">Нет изображения</div>
-    {% endif %}
-  </div>
+<div class="max-w-6xl mx-auto">
+    
+    <nav class="text-sm text-gray-500 mb-6 flex items-center gap-2">
+        <a href="{% url 'home' %}" class="hover:text-pink-500 transition">Главная</a>
+        <span class="text-gray-300">/</span>
+        {% if product.category %}
+        <a href="{{ product.category.get_absolute_url }}" class="hover:text-pink-500 transition">{{ product.category.name }}</a>
+        <span class="text-gray-300">/</span>
+        {% endif %}
+        <span class="text-gray-800 font-medium">{{ product.name }}</span>
+    </nav>
 
-  <aside class="bg-white p-4 rounded-lg">
-    <h2 class="text-2xl font-semibold">{{ product.name }}</h2>
-    <p class="text-lg text-gray-700 mt-2">{{ product.price }} ₽</p>
-    <p class="mt-4"><strong>Вес:</strong> {{ product.weight }} г</p>
-    <form action="{% url 'cart:cart_add' product.pk %}" method="post" class="mt-4">
-      {% csrf_token %}
-      <label class="block mb-2">Количество
-        <input type="number" name="quantity" value="1" min="1" class="w-full p-2 rounded border mt-1" />
-      </label>
-      <button type="submit" class="w-full p-2 rounded mt-2" style="background: var(--accent-pink);">Добавить в корзину</button>
-    </form>
-  </aside>
-</div>
+    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2">
+            
+            <div class="p-8 bg-gray-50 flex items-center justify-center min-h-[400px] md:min-h-[500px]">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" 
+                         alt="{{ product.name }}" 
+                         class="w-full h-full max-h-[450px] object-contain drop-shadow-xl hover:scale-105 transition-transform duration-500">
+                {% else %}
+                    <div class="text-gray-300 text-6xl">🍩</div>
+                {% endif %}
+            </div>
 
-<div class="mt-6 bg-white p-4 rounded-lg">
-  <h3 class="font-semibold">Описание</h3>
-  <p class="text-sm text-gray-700 whitespace-pre-line">{{ product.description }}</p>
+            <div class="p-8 md:p-12 flex flex-col justify-center">
+                <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">{{ product.name }}</h1>
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="text-3xl font-bold text-pink-500">{{ product.price }} ₽</div>
+                    {% if product.weight %}
+                    <div class="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 font-medium">
+                        {{ product.weight }} г
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="prose text-gray-600 mb-8 leading-relaxed">
+                    {{ product.description|linebreaks }}
+                </div>
+
+                <form action="{% url 'cart:cart_add' product.pk %}" method="post" class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                    {% csrf_token %}
+                    <div class="flex items-end gap-4">
+                        <div class="w-24">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Кол-во</label>
+                            <input type="number" name="quantity" value="1" min="1" 
+                                   class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-200 focus:border-pink-300 outline-none text-center font-bold text-lg">
+                        </div>
+                        <button type="submit" 
+                                class="flex-1 bg-gray-900 text-white p-3 rounded-xl font-bold hover:bg-pink-500 transition-colors shadow-lg shadow-pink-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            В корзину
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-6 flex gap-4 text-sm text-gray-500">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        В наличии
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Быстрая доставка
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
