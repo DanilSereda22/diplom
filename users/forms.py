@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from .models import CustomUser
 
 
@@ -13,12 +12,14 @@ class RegisterForm(UserCreationForm):
     )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             "username",
             "first_name",
             "last_name",
             "email",
+            "phone",
+            "address",
             "password1",
             "password2",
         )
@@ -30,12 +31,12 @@ class RegisterForm(UserCreationForm):
             field.widget.attrs.setdefault("class", "w-full p-2 rounded border")
 
     def save(self, commit=True):
-        user = super().save(commit=True)
+        user = super().save(commit=False)
 
-        # создаём профиль
-        CustomUser.objects.create(
-            user=user,
-            phone=self.cleaned_data.get("phone"),
-            address=self.cleaned_data.get("address"),
-        )
+        user.phone = self.cleaned_data.get("phone")
+        user.address = self.cleaned_data.get("address")
+
+        if commit:
+            user.save()
+
         return user

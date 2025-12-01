@@ -9,25 +9,44 @@
     <div>
         <form action="." method="post" id="checkout-form">
             {% csrf_token %}
+
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
                 <h3 class="font-bold text-lg mb-2">Контактные данные</h3>
-                
+
+                {# Вывод всех полей, кроме доставки #}
                 {% for field in form %}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-600 mb-1 pl-1">{{ field.label }}</label>
-                    <input type="{{ field.field.widget.input_type }}" 
-                           name="{{ field.name }}" 
-                           id="{{ field.id_for_label }}"
-                           value="{{ field.value|default:'' }}"
-                           class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:bg-white focus:border-pink-300 focus:ring-4 focus:ring-pink-100 outline-none transition-all">
-                    {% if field.errors %}
-                        <p class="text-red-500 text-xs mt-1 ml-1">{{ field.errors.0 }}</p>
+                    {% if field.name != "delivery_method" %}
+                    <div id="field-{{ field.name }}">
+                        <label class="block text-sm font-semibold text-gray-600 mb-1 pl-1">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <p class="text-red-500 text-xs mt-1 ml-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                </div>
                 {% endfor %}
+
+                <h3 class="font-bold text-lg mt-4">Метод доставки</h3>
+
+                <div class="space-y-2">
+                    {% for value, label in form.delivery_method.field.choices %}
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio"
+                                   name="{{ form.delivery_method.name }}"
+                                   value="{{ value }}"
+                                   class="text-pink-500 focus:ring-pink-300"
+                                   {% if form.delivery_method.value == value %}checked{% endif %}>
+                            <span class="text-gray-700">{{ label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
             </div>
 
-            <button type="submit" class="w-full mt-6 bg-gray-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-pink-500 shadow-xl shadow-pink-100 hover:shadow-pink-200 transition-all transform hover:-translate-y-1">
+            <button type="submit"
+                    class="w-full mt-6 bg-gray-900 text-white py-4 rounded-xl font-bold text-lg
+                           hover:bg-pink-500 shadow-xl shadow-pink-100 hover:shadow-pink-200
+                           transition-all transform hover:-translate-y-1">
                 Подтвердить заказ
             </button>
         </form>
@@ -45,25 +64,45 @@
                                 <img src="{{ item.product.image.url }}" class="w-full h-full object-contain">
                              {% endif %}
                         </div>
-                        <span class="text-gray-700 font-medium">{{ item.product.name }} <span class="text-gray-400">x{{ item.quantity }}</span></span>
+                        <span class="text-gray-700 font-medium">
+                            {{ item.product.name }}
+                            <span class="text-gray-400">x{{ item.quantity }}</span>
+                        </span>
                     </div>
-                    <span class="font-bold text-gray-800">{{ item.total_price }} ₽</span>
+                    <span class="font-bold text-gray-800">{{ item.total_price }}&nbsp;₽</span>
                 </li>
                 {% endfor %}
             </ul>
             
             <div class="border-t border-gray-200 pt-4 flex justify-between items-center text-xl font-extrabold text-gray-900">
                 <span>Итого к оплате:</span>
-                <span>{{ cart.get_total_price }} ₽</span>
-            </div>
-            
-            <div class="mt-4 flex items-start gap-2 text-xs text-gray-500 bg-white p-3 rounded-xl">
-                 <span>🔒</span>
-                 <p>Ваши данные надежно защищены. Оплата происходит при получении или через защищенный шлюз.</p>
+                <span>{{ cart.get_total_price }}&nbsp;₽</span>
             </div>
         </div>
     </div>
 
   </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const addressField = document.getElementById("field-address");
+
+    function updateVisibility() {
+        const method = document.querySelector("input[name='delivery_method']:checked")?.value;
+        if (method === "pickup") {
+            addressField.style.display = "none";
+        } else {
+            addressField.style.display = "block";
+        }
+    }
+
+    document.querySelectorAll("input[name='delivery_method']").forEach(radio => {
+        radio.addEventListener("change", updateVisibility);
+    });
+
+    updateVisibility();
+});
+</script>
+
 {% endblock %}

@@ -13,7 +13,7 @@ def cart_add(request, product_pk):
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_pk)
     quantity = int(request.POST.get("quantity", 1))
-    override = request.POST.get("override", "false") == "true"
+    override = request.POST.get("override", "false").lower() == "true"
     cart.add(product=product, quantity=quantity, override_quantity=override)
     return redirect("cart:cart_detail")
 

@@ -23,19 +23,19 @@
             <a href="{{ item.product.get_absolute_url }}" class="font-bold text-gray-800 hover:text-pink-600 transition block mb-1">
                 {{ item.product.name }}
             </a>
-            <div class="text-sm text-gray-500">{{ item.price }} ₽ / шт.</div>
+            <div class="text-sm text-gray-500">{{ item.price }}&nbsp;₽ / шт.</div>
         </div>
 
         <form action="{% url 'cart:cart_add' item.product.pk %}" method="post" class="flex items-center">
             {% csrf_token %}
-            <input type="hidden" name="override" value="True">
+            <input type="hidden" name="override" value="true">
             <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
                    class="w-16 p-2 rounded-lg border border-gray-200 text-center text-sm focus:ring-pink-200 focus:border-pink-300 outline-none"
                    onchange="this.form.submit()">
         </form>
 
         <div class="font-bold text-gray-800 min-w-[80px] text-right">
-            {{ item.total_price }} ₽
+            {{ item.total_price }}&nbsp;₽
         </div>
 
         <form action="{% url 'cart:cart_remove' item.product.pk %}" method="post">

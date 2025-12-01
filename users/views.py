@@ -19,7 +19,6 @@ def register_view(request):
 def profile_view(request):
     user = request.user
     if request.method == "POST":
-        # Простая реализация редактирования профиля
         user.first_name = request.POST.get("first_name", user.first_name)
         user.last_name = request.POST.get("last_name", user.last_name)
         user.phone = request.POST.get("phone", user.phone)

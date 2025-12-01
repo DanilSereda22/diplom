@@ -21,7 +21,6 @@ def checkout_view(request):
             if request.user.is_authenticated:
                 order.user = request.user
             order.save()
-            # Create order items
             for item in cart:
                 OrderItem.objects.create(
                     order=order,
@@ -29,7 +28,6 @@ def checkout_view(request):
                     price=item["price"],
                     quantity=item["quantity"],
                 )
-            # Очистить корзину
             cart.clear()
             messages.success(request, f"Спасибо! Заказ #{order.pk} создан.")
             return redirect("store:product_list")
