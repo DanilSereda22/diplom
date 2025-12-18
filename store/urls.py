@@ -9,4 +9,8 @@ urlpatterns = [
     path("category/<slug:slug>/", views.category_view, name="category"),
     path("subcategory/<slug:slug>/", views.subcategory_view, name="subcategory"),
     path("product/<slug:slug>/", views.product_detail, name="product_detail"),
+    path("delivery/", views.delivery, name="delivery"),
+    path("faq/", views.faq, name="faq"),
+    path("privacy/", views.privacy, name="privacy"),
+    path("terms/", views.terms, name="terms"),
 ]

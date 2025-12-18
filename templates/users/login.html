@@ -49,6 +49,12 @@
                 Войти
             </button>
         </form>
+        <div class="mt-4 text-center text-sm">
+            <a href="{% url 'users:password_reset' %}"
+            class="text-pink-600 font-bold hover:underline">
+                Забыли пароль?
+            </a>
+        </div>
 
         <div class="mt-6 text-center text-sm text-gray-500">
             Нет аккаунта? <a href="{% url 'users:register' %}" class="text-pink-600 font-bold hover:underline">Зарегистрироваться</a>

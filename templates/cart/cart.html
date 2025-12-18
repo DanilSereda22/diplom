@@ -1,80 +1,58 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="max-w-4xl mx-auto">
-  <h2 class="text-3xl font-bold mb-8 text-gray-800">Ваша корзина 🛒</h2>
+<div class="max-w-4xl mx-auto px-4">
+  <h2 class="text-3xl font-black mb-8 text-gray-800">Ваша корзина 🛒</h2>
 
-  {% if cart|length > 0 %}
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    
+  {% if cart %}
+  <div class="grid lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2 space-y-4">
       {% for item in cart %}
-      <div class="bg-white p-4 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition">
-        
-        <div class="w-20 h-20 bg-gray-50 rounded-xl flex-shrink-0 flex items-center justify-center p-1">
-             {% if item.product.image %}
-                <img src="{{ item.product.image.url }}" class="w-full h-full object-contain">
-             {% else %}
-                <span>🍬</span>
-             {% endif %}
+      <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition duration-300">
+        <div class="w-20 h-20 bg-gray-50 rounded-2xl shrink-0 flex items-center justify-center overflow-hidden">
+          {% if item.product.image %}<img src="{{ item.product.image.url }}" class="w-full h-full object-contain p-1">
+          {% else %}<span class="text-2xl">🍬</span>{% endif %}
         </div>
 
         <div class="flex-grow">
-            <a href="{{ item.product.get_absolute_url }}" class="font-bold text-gray-800 hover:text-pink-600 transition block mb-1">
-                {{ item.product.name }}
-            </a>
-            <div class="text-sm text-gray-500">{{ item.price }}&nbsp;₽ / шт.</div>
+          <a href="{{ item.product.get_absolute_url }}" class="font-bold text-gray-800 hover:text-pink-600 transition leading-tight block">{{ item.product.name }}</a>
+          <p class="text-xs text-gray-400 mt-1">{{ item.price }}&nbsp;₽ / шт.</p>
         </div>
 
-        <form action="{% url 'cart:cart_add' item.product.pk %}" method="post" class="flex items-center">
-            {% csrf_token %}
-            <input type="hidden" name="override" value="true">
-            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" 
-                   class="w-16 p-2 rounded-lg border border-gray-200 text-center text-sm focus:ring-pink-200 focus:border-pink-300 outline-none"
-                   onchange="this.form.submit()">
+        <form action="{% url 'cart:cart_add' item.product.pk %}" method="post">
+          {% csrf_token %}<input type="hidden" name="override" value="true">
+          <input type="number" name="quantity" value="{{ item.quantity }}" min="1" onchange="this.form.submit()" 
+                 class="w-14 p-2 rounded-xl border border-gray-100 text-center text-sm font-bold focus:ring-2 focus:ring-pink-200 outline-none transition">
         </form>
 
-        <div class="font-bold text-gray-800 min-w-[80px] text-right">
-            {{ item.total_price }}&nbsp;₽
+        <div class="text-right min-w-[70px]">
+          <p class="font-black text-gray-900">{{ item.total_price }}&nbsp;₽</p>
+          <form action="{% url 'cart:cart_remove' item.product.pk %}" method="post" class="inline">
+            {% csrf_token %}<button class="text-gray-300 hover:text-red-500 transition text-xs font-bold uppercase tracking-tighter">Удалить</button>
+          </form>
         </div>
-
-        <form action="{% url 'cart:cart_remove' item.product.pk %}" method="post">
-            {% csrf_token %}
-            <button class="text-gray-300 hover:text-red-500 p-2 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
-        </form>
       </div>
       {% endfor %}
     </div>
 
-    <div class="lg:col-span-1">
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
-            <h3 class="text-lg font-bold mb-4">Сумма заказа</h3>
-            <div class="flex justify-between items-center text-xl font-extrabold text-gray-900 mb-6">
-                <span>Итого:</span>
-                <span>{{ cart.get_total_price }} ₽</span>
-            </div>
-            
-            <a href="{% url 'orders:checkout' %}" class="block w-full text-center bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-pink-500 hover:shadow-lg hover:shadow-pink-200 transition-all duration-300">
-                Оформить заказ
-            </a>
-            
-            <a href="{% url 'store:product_list' %}" class="block w-full text-center mt-4 text-sm text-gray-500 hover:text-gray-800">
-                Продолжить покупки
-            </a>
+    <aside class="lg:col-span-1">
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 sticky top-24">
+        <h3 class="text-lg font-bold mb-4 text-gray-700">Сумма заказа</h3>
+        <div class="flex justify-between items-end mb-6">
+          <span class="text-gray-400 font-medium">Итого:</span>
+          <span class="text-2xl font-black text-gray-900 leading-none">{{ cart.get_total_price }}&nbsp;₽</span>
         </div>
-    </div>
-
+        <a href="{% url 'orders:checkout' %}" class="block w-full text-center bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-pink-500 shadow-xl shadow-pink-100 transition-all">Оформить заказ</a>
+        <a href="{% url 'store:product_list' %}" class="block text-center mt-4 text-xs font-bold text-gray-400 hover:text-gray-600 uppercase tracking-widest transition">Продолжить покупки</a>
+      </div>
+    </aside>
   </div>
+
   {% else %}
-  <div class="text-center py-16 bg-white rounded-3xl shadow-sm border border-gray-100">
-      <div class="text-6xl mb-4">🛒</div>
-      <h3 class="text-xl font-bold text-gray-800 mb-2">Корзина пуста</h3>
-      <p class="text-gray-500 mb-6">Самое время наполнить её сладостями!</p>
-      <a href="{% url 'store:product_list' %}" class="inline-block px-6 py-3 bg-pink-100 text-pink-600 font-bold rounded-xl hover:bg-pink-200 transition">
-          Перейти в каталог
-      </a>
+  <div class="text-center py-20 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
+    <div class="text-7xl mb-6">🛒</div>
+    <h3 class="text-2xl font-black text-gray-800 mb-2">Корзина пуста</h3>
+    <p class="text-gray-400 mb-8">Кажется, вы еще не выбрали ничего вкусного.</p>
+    <a href="{% url 'store:product_list' %}" class="inline-block px-8 py-4 bg-pink-500 text-white font-bold rounded-2xl hover:bg-pink-600 shadow-lg shadow-pink-100 transition">В каталог сладостей</a>
   </div>
   {% endif %}
 </div>

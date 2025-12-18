@@ -1,108 +1,71 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="max-w-5xl mx-auto">
-  <h2 class="text-3xl font-bold mb-8 text-gray-800">Оформление заказа</h2>
+<div class="max-w-5xl mx-auto px-4">
+  <h2 class="text-3xl font-black mb-8 text-gray-800">Оформление заказа</h2>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-    
-    <div>
-        <form action="." method="post" id="checkout-form">
-            {% csrf_token %}
+  <div class="grid md:grid-cols-2 gap-10 items-start">
+    <form method="post" id="checkout-form" class="space-y-6">
+      {% csrf_token %}
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
+        <h3 class="font-bold text-lg">Контактные данные</h3>
+        {% for f in form %}
+          {% if f.name != "delivery_method" %}
+          <div id="field-{{ f.name }}">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">{{ f.label }}</label>
+            {{ f }}
+            {% if f.errors %}<p class="text-red-500 text-xs mt-1">{{ f.errors.0 }}</p>{% endif %}
+          </div>
+          {% endif %}
+        {% endfor %}
 
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-                <h3 class="font-bold text-lg mb-2">Контактные данные</h3>
-
-                {# Вывод всех полей, кроме доставки #}
-                {% for field in form %}
-                    {% if field.name != "delivery_method" %}
-                    <div id="field-{{ field.name }}">
-                        <label class="block text-sm font-semibold text-gray-600 mb-1 pl-1">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                            <p class="text-red-500 text-xs mt-1 ml-1">{{ field.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                {% endfor %}
-
-                <h3 class="font-bold text-lg mt-4">Метод доставки</h3>
-
-                <div class="space-y-2">
-                    {% for value, label in form.delivery_method.field.choices %}
-                        <label class="flex items-center gap-3 cursor-pointer">
-                            <input type="radio"
-                                   name="{{ form.delivery_method.name }}"
-                                   value="{{ value }}"
-                                   class="text-pink-500 focus:ring-pink-300"
-                                   {% if form.delivery_method.value == value %}checked{% endif %}>
-                            <span class="text-gray-700">{{ label }}</span>
-                        </label>
-                    {% endfor %}
-                </div>
-
-            </div>
-
-            <button type="submit"
-                    class="w-full mt-6 bg-gray-900 text-white py-4 rounded-xl font-bold text-lg
-                           hover:bg-pink-500 shadow-xl shadow-pink-100 hover:shadow-pink-200
-                           transition-all transform hover:-translate-y-1">
-                Подтвердить заказ
-            </button>
-        </form>
-    </div>
-
-    <div>
-        <div class="bg-gray-50 p-6 rounded-3xl border border-dashed border-gray-300 sticky top-24">
-            <h3 class="font-bold text-lg mb-4">Ваш заказ</h3>
-            <ul class="space-y-3 mb-6">
-                {% for item in cart %}
-                <li class="flex justify-between items-center text-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1 border border-gray-100">
-                             {% if item.product.image %}
-                                <img src="{{ item.product.image.url }}" class="w-full h-full object-contain">
-                             {% endif %}
-                        </div>
-                        <span class="text-gray-700 font-medium">
-                            {{ item.product.name }}
-                            <span class="text-gray-400">x{{ item.quantity }}</span>
-                        </span>
-                    </div>
-                    <span class="font-bold text-gray-800">{{ item.total_price }}&nbsp;₽</span>
-                </li>
-                {% endfor %}
-            </ul>
-            
-            <div class="border-t border-gray-200 pt-4 flex justify-between items-center text-xl font-extrabold text-gray-900">
-                <span>Итого к оплате:</span>
-                <span>{{ cart.get_total_price }}&nbsp;₽</span>
-            </div>
+        <h3 class="font-bold text-lg pt-2">Способ доставки</h3>
+        <div class="space-y-2">
+          {% for val, label in form.delivery_method.field.choices %}
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-50 hover:bg-pink-50 cursor-pointer transition">
+            <input type="radio" name="{{ form.delivery_method.name }}" value="{{ val }}" class="text-pink-500 focus:ring-pink-200" {% if form.delivery_method.value == val %}checked{% endif %}>
+            <span class="text-sm font-medium text-gray-700">{{ label }}</span>
+          </label>
+          {% endfor %}
         </div>
-    </div>
+      </div>
 
+      <button type="submit" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-pink-500 shadow-xl shadow-pink-100 hover:-translate-y-0.5 transition-all">
+        Подтвердить заказ
+      </button>
+    </form>
+
+    <div class="bg-gray-50 p-6 rounded-[2rem] border-2 border-dashed border-gray-200 sticky top-24">
+      <h3 class="font-bold text-lg mb-4">Ваш заказ</h3>
+      <ul class="space-y-4 mb-6">
+        {% for item in cart %}
+        <li class="flex justify-between items-center text-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white rounded-xl p-1 border border-gray-100 shrink-0">
+              {% if item.product.image %}<img src="{{ item.product.image.url }}" class="w-full h-full object-contain">{% endif %}
+            </div>
+            <div class="leading-tight">
+              <p class="font-bold text-gray-800">{{ item.product.name }}</p>
+              <p class="text-gray-400">Кол-во: {{ item.quantity }}</p>
+            </div>
+          </div>
+          <span class="font-black text-gray-900">{{ item.total_price }} ₽</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="border-t border-gray-200 pt-4 flex justify-between items-center">
+        <span class="text-gray-500 font-bold">Итого:</span>
+        <span class="text-2xl font-black text-gray-900">{{ cart.get_total_price }} ₽</span>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const addressField = document.getElementById("field-address");
-
-    function updateVisibility() {
-        const method = document.querySelector("input[name='delivery_method']:checked")?.value;
-        if (method === "pickup") {
-            addressField.style.display = "none";
-        } else {
-            addressField.style.display = "block";
-        }
-    }
-
-    document.querySelectorAll("input[name='delivery_method']").forEach(radio => {
-        radio.addEventListener("change", updateVisibility);
-    });
-
-    updateVisibility();
-});
+  const updateDelivery = () => {
+    const isPickup = document.querySelector('input[name="delivery_method"]:checked')?.value === 'pickup';
+    document.getElementById('field-address').style.display = isPickup ? 'none' : 'block';
+  };
+  document.querySelectorAll('input[name="delivery_method"]').forEach(r => r.onchange = updateDelivery);
+  updateDelivery();
 </script>
-
 {% endblock %}

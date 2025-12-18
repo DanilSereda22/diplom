@@ -1,72 +1,30 @@
 {% extends "base.html" %}
-
 {% block content %}
 <div class="max-w-6xl mx-auto">
+  <div class="flex items-center gap-4 mb-10 bg-white p-4 rounded-3xl shadow-sm border border-gray-50">
+    <div class="w-14 h-14 bg-gradient-to-br from-pink-100 to-yellow-50 rounded-2xl flex items-center justify-center text-3xl">🍪</div>
+    <div>
+      <h2 class="text-3xl font-black text-gray-800">{{ subcategory.name }}</h2>
+      <p class="text-gray-400 text-sm">В категории {{ subcategory.category.name }} • {{ subcategory.products.count }} шт.</p>
+    </div>
+  </div>
 
-    <nav class="flex items-center text-sm font-medium text-gray-500 mb-8 bg-white px-4 py-3 rounded-2xl shadow-sm inline-flex border border-gray-100">
-        <a href="{% url 'home' %}" class="hover:text-pink-500 hover:underline transition">Главная</a>
-        <span class="mx-2 text-gray-300">/</span>
-        <a href="{{ subcategory.category.get_absolute_url }}" class="hover:text-pink-500 hover:underline transition">
-            {{ subcategory.category.name }}
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {% for p in subcategory.products.all %}
+      <div class="group bg-white rounded-3xl border border-gray-100 hover:border-pink-200 hover:-translate-y-1 transition-all overflow-hidden shadow-sm">
+        <a href="{{ p.get_absolute_url }}" class="p-4 flex flex-col h-full">
+          <div class="relative aspect-square bg-gray-50 rounded-2xl mb-4 flex items-center justify-center">
+            {% if p.image %}<img src="{{ p.image.url }}" class="w-full h-full object-contain p-3 group-hover:scale-110 transition duration-500">{% endif %}
+            {% if p.price < 500 %}<span class="absolute top-2 left-2 bg-yellow-300 text-[9px] font-black px-2 py-0.5 rounded-full">ХИТ</span>{% endif %}
+          </div>
+          <h3 class="font-bold text-gray-800 text-sm mb-1 group-hover:text-pink-600">{{ p.name }}</h3>
+          <div class="flex justify-between items-center mt-auto">
+            <span class="text-lg font-black text-gray-900">{{ p.price }} ₽</span>
+            <div class="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-pink-500 group-hover:text-white transition flex items-center justify-center text-xs">+</div>
+          </div>
         </a>
-        <span class="mx-2 text-gray-300">/</span>
-        <span class="text-gray-800">{{ subcategory.name }}</span>
-    </nav>
-
-    <div class="flex items-center gap-4 mb-8">
-        <div class="w-12 h-12 bg-gradient-to-br from-pink-200 to-yellow-100 rounded-xl flex items-center justify-center text-2xl shadow-sm">
-            🍪
-        </div>
-        <div>
-            <h2 class="text-3xl font-extrabold text-gray-800">{{ subcategory.name }}</h2>
-            <p class="text-gray-500 text-sm mt-1">Всего товаров: {{ subcategory.products.count }}</p>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-        {% for product in subcategory.products.all %}
-        <div class="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col border border-gray-100 hover:border-pink-200 hover:-translate-y-1 overflow-hidden">
-            <a href="{{ product.get_absolute_url }}" class="flex flex-col h-full p-4">
-            
-            <div class="relative aspect-square w-full bg-gray-50 rounded-2xl mb-4 flex items-center justify-center overflow-hidden">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" 
-                         alt="{{ product.name }}" 
-                         class="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-500">
-                {% else %}
-                    <span class="text-4xl opacity-20">🍬</span>
-                {% endif %}
-                
-                {% if product.price < 500 %}
-                    <span class="absolute top-2 left-2 bg-yellow-300 text-yellow-900 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">ХИТ</span>
-                {% endif %}
-            </div>
-
-            <div class="mt-auto">
-                <h3 class="font-bold text-gray-800 leading-tight mb-2 group-hover:text-pink-600 transition-colors">
-                    {{ product.name }}
-                </h3>
-                <div class="flex items-center justify-between mt-2">
-                    <span class="text-lg font-extrabold text-gray-900">{{ product.price }} ₽</span>
-                    
-                    <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center group-hover:bg-pink-500 group-hover:text-white transition-all shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    </div>
-                </div>
-            </div>
-            </a>
-        </div>
-        {% empty %}
-            <div class="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-200">
-                <div class="text-6xl mb-4 opacity-50">🍯</div>
-                <h3 class="text-xl font-bold text-gray-600">Пусто...</h3>
-                <p class="text-gray-400">В этой подкатегории пока нет товаров.</p>
-                <a href="{{ subcategory.category.get_absolute_url }}" class="inline-block mt-4 text-pink-500 font-bold hover:underline">Вернуться в {{ subcategory.category.name }}</a>
-            </div>
-        {% endfor %}
-
-    </div>
-
+      </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

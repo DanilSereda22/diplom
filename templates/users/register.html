@@ -38,29 +38,26 @@
             {% endfor %}
 
             <style>
-                /* Стилизуем все input, чтобы они выглядели как Tailwind компоненты */
                 input[type="text"], 
                 input[type="password"], 
                 input[type="email"], 
                 input[type="number"] {
                     width: 100%;
                     padding: 12px 16px;
-                    border-radius: 12px; /* rounded-xl */
-                    border: 1px solid #E5E7EB; /* border-gray-200 */
-                    background-color: #F9FAFB; /* bg-gray-50 */
+                    border-radius: 12px;
+                    border: 1px solid #E5E7EB; 
+                    background-color: #F9FAFB; 
                     outline: none;
                     transition: all 0.2s;
                     color: #374151;
                 }
                 
-                /* Эффект фокуса */
                 input:focus {
                     background-color: #ffffff;
-                    border-color: #F9A8D4; /* border-pink-300 */
-                    box-shadow: 0 0 0 4px #FCE7F3; /* ring-pink-100 */
+                    border-color: #F9A8D4; 
+                    box-shadow: 0 0 0 4px #FCE7F3;
                 }
 
-                /* Скрываем стандартные подсказки списка Django, если они мешают дизайну */
                 .helptext {
                     display: block;
                     font-size: 0.75rem;
