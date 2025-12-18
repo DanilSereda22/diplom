@@ -19,10 +19,6 @@ class CustomPasswordResetForm(PasswordResetForm):
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     phone = forms.CharField(required=False, max_length=30)
-    address = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 3}),
-        required=False
-    )
     class Meta:
         model = CustomUser
         fields = (
@@ -31,7 +27,6 @@ class RegisterForm(UserCreationForm):
             "last_name",
             "email",
             "phone",
-            "address",
             "password1",
             "password2",
         )
@@ -43,7 +38,6 @@ class RegisterForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.phone = self.cleaned_data.get("phone")
-        user.address = self.cleaned_data.get("address")
         if commit:
             user.save()
         return user

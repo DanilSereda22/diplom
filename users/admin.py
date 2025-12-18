@@ -7,7 +7,8 @@ from .models import CustomUser
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
     fieldsets = UserAdmin.fieldsets + (
-        ("Дополнительно", {"fields": ("phone", "address")}),
+        ("Дополнительно", {"fields": ["phone"]}),  # лучше использовать список
     )
     list_display = ("username", "email", "first_name", "last_name", "phone", "is_staff")
     search_fields = ("username", "email", "first_name", "last_name", "phone")
+

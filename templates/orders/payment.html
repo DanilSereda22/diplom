@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+  <h2 class="text-2xl font-black mb-6 text-gray-800">Оплата заказа №{{ order.id }}</h2>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+
+    <div>
+      <label class="text-xs font-bold text-gray-400 uppercase">Номер карты</label>
+      <input type="text" maxlength="19" placeholder="0000 0000 0000 0000"
+        class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
+        required>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="text-xs font-bold text-gray-400 uppercase">Месяц / Год</label>
+        <input type="text" placeholder="MM / YY"
+          class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
+          required>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-400 uppercase">CVC</label>
+        <input type="password" placeholder="***"
+          class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
+          required>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs font-bold text-gray-400 uppercase">Имя и фамилия</label>
+      <input type="text" placeholder="IVAN IVANOV"
+        class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
+        required>
+    </div>
+
+    <button type="submit"
+      class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black hover:bg-pink-500 shadow-xl transition">
+      Оплатить {{ order.total_price }} ₽
+    </button>
+  </form>
+
+  <p class="text-xs text-gray-400 mt-4 text-center">
+    Это демонстрационная страница. Реальная оплата не производится.
+  </p>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ===== НОМЕР КАРТЫ ===== */
+  const cardInput = document.querySelector('input[placeholder="0000 0000 0000 0000"]');
+
+  cardInput.addEventListener("input", () => {
+    let value = cardInput.value.replace(/\D/g, "").slice(0, 16);
+    cardInput.value = value.replace(/(.{4})/g, "$1 ").trim();
+  });
+
+  /* ===== МЕСЯЦ / ГОД ===== */
+  const dateInput = document.querySelector('input[placeholder="MM / YY"]');
+
+  dateInput.addEventListener("input", () => {
+    let value = dateInput.value.replace(/\D/g, "").slice(0, 4);
+
+    if (value.length >= 3) {
+      dateInput.value = value.slice(0, 2) + "/" + value.slice(2);
+    } else {
+      dateInput.value = value;
+    }
+  });
+
+  /* ===== CVC ===== */
+  const cvcInput = document.querySelector('input[placeholder="***"]');
+
+  cvcInput.addEventListener("input", () => {
+    cvcInput.value = cvcInput.value.replace(/\D/g, "").slice(0, 3);
+  });
+
+  /* ===== ИМЯ / ФАМИЛИЯ ===== */
+  const nameInput = document.querySelector('input[placeholder="IVAN IVANOV"]');
+
+  nameInput.addEventListener("input", () => {
+    nameInput.value = nameInput.value.replace(/[^a-zA-Zа-яА-Я\s]/g, "").toUpperCase();
+  });
+
+});
+</script>
+
+{% endblock %}

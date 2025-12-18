@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-white p-10 rounded-3xl shadow-xl border border-pink-100 text-center">
+    <div class="text-6xl mb-6">✅</div>
+
+    <h1 class="text-3xl font-black text-gray-800 mb-4">
+        Оплата прошла успешно
+    </h1>
+
+    <p class="text-gray-500 mb-6">
+        Заказ №{{ order.id }} был успешно оплачен.
+    </p>
+
+    <div class="bg-gray-50 rounded-2xl p-4 text-sm text-gray-600 mb-6">
+        <p><strong>Имя:</strong> {{ order.first_name }} {{ order.last_name }}</p>
+        <p><strong>Email:</strong> {{ order.email }}</p>
+        <p><strong>Статус:</strong> Оплачен</p>
+    </div>
+
+    <a href="{% url 'store:product_list' %}"
+       class="inline-block px-8 py-4 bg-pink-500 text-white font-bold rounded-2xl hover:bg-pink-600 transition">
+        Вернуться в магазин
+    </a>
+</div>
+{% endblock %}
