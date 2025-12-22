@@ -3,30 +3,48 @@
 <div class="max-w-5xl mx-auto">
   <nav class="text-sm text-gray-400 mb-6">
     <a href="/" class="hover:text-pink-500">Главная</a> / 
-    {% if product.category %}<a href="{{ product.category.get_absolute_url }}" class="hover:text-pink-500">{{ product.category.name }}</a> / {% endif %}
+    {% if product.category %}
+      <a href="{{ product.category.get_absolute_url }}" class="hover:text-pink-500">{{ product.category.name }}</a> / 
+    {% endif %}
     <span class="text-gray-800">{{ product.name }}</span>
   </nav>
 
   <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden grid md:grid-cols-2">
+    
+    <!-- IMAGE -->
     <div class="p-8 bg-gray-50 flex items-center justify-center">
-      {% if product.image %}<img src="{{ product.image.url }}" class="max-h-[400px] object-contain drop-shadow-2xl hover:scale-105 transition duration-500">
-      {% else %}<div class="text-8xl opacity-10">🍩</div>{% endif %}
+      {% if product.image %}
+        <img src="{{ product.image.url }}" class="max-h-[400px] object-contain drop-shadow-2xl hover:scale-105 transition duration-500">
+      {% else %}
+        <div class="text-8xl opacity-10">🍩</div>
+      {% endif %}
     </div>
 
-    <div class="p-8 md:p-12 flex flex-col">
-      <h1 class="text-3xl md:text-4xl font-black text-gray-800 mb-4">{{ product.name }}</h1>
-      <div class="flex items-center gap-4 mb-6">
-        <span class="text-3xl font-bold text-pink-500">{{ product.price }} ₽</span>
-        {% if product.weight %}<span class="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-500">{{ product.weight }} г</span>{% endif %}
+    <!-- INFO -->
+    <div class="p-8 md:p-12 flex flex-col justify-between">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-black text-gray-800 mb-4">{{ product.name }}</h1>
+
+        <div class="flex items-center gap-4 mb-6">
+          <span class="text-3xl font-bold text-pink-500">{{ product.price }} ₽</span>
+          {% if product.weight %}
+            <span class="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-500">{{ product.weight }} г</span>
+          {% endif %}
+        </div>
+
+        <p class="text-gray-600 mb-8 leading-relaxed">{{ product.description|linebreaks }}</p>
       </div>
 
-      <p class="text-gray-600 mb-8 leading-relaxed">{{ product.description|linebreaks }}</p>
-
-      <form action="{% url 'cart:cart_add' product.pk %}" method="post" class="mt-auto flex gap-4">
+      <!-- ADD TO CART -->
+      <form action="{% url 'cart:cart_add' product.pk %}" method="post" class="flex gap-4 mt-4 md:mt-0">
         {% csrf_token %}
-        <input type="number" name="quantity" value="1" min="1" class="w-20 p-3 rounded-2xl border border-gray-200 text-center font-bold outline-none focus:ring-2 focus:ring-pink-200">
-        <button type="submit" class="flex-1 bg-gray-900 text-white rounded-2xl font-bold hover:bg-pink-500 transition shadow-lg shadow-pink-100 flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <input type="number" name="quantity" value="1" min="1"
+               class="w-20 p-3 rounded-2xl border border-gray-200 text-center font-bold outline-none focus:ring-2 focus:ring-pink-200">
+        <button type="submit"
+                class="flex-1 bg-gray-900 text-white rounded-2xl font-bold hover:bg-pink-500 transition shadow-lg shadow-pink-100 flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
           В корзину
         </button>
       </form>

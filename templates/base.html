@@ -27,7 +27,7 @@
         <a href="{% url 'store:product_list' %}" class="font-semibold hover:text-pink-500 transition">Каталог</a>
         {% if user.is_authenticated %}
           <div class="relative group hidden sm:block">
-            <a href="{% url 'users:profile' %}" class="font-semibold hover:text-pink-500 flex items-center gap-1">👤 Кабинет</a>
+            <a href="{% url 'users:profile' %}" class="font-semibold hover:text-pink-500 flex items-center gap-1">Кабинет</a>
             <div class="absolute right-0 hidden group-hover:block pt-2">
               <div class="bg-white shadow-xl rounded-xl border border-gray-100 p-2 w-48">
                 <a href="{% url 'users:profile' %}" class="block px-4 py-2 hover:bg-pink-50 rounded-lg text-sm">Профиль</a>

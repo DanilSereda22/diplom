@@ -23,6 +23,7 @@ class Cart:
             self.cart[pid]["quantity"] += int(quantity)
         self.save()
 
+
     def remove(self, product: Product):
         pid = str(product.pk)
         if pid in self.cart:
@@ -59,3 +60,8 @@ class Cart:
 
     def is_empty(self):
         return len(self.cart) == 0
+    
+    def get_product_quantity(self, product):
+        item = self.cart.get(str(product.id))
+        return item["quantity"] if item else 0
+
