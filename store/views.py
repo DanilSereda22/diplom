@@ -99,3 +99,6 @@ def privacy(request):
 
 def terms(request):
     return render(request, "pages/terms.html")
+
+def contacts_page(request):
+    return render(request, 'pages/contacts.html')

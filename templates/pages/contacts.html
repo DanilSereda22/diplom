@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto py-10 px-4">
+    <div class="text-center mb-16">
+        <h1 class="text-4xl md:text-5xl font-black text-gray-800 mb-4">Свяжитесь с нами</h1>
+        <p class="text-gray-500 max-w-2xl mx-auto italic">Есть вопросы или предложения? Мы всегда рады общению! Напишите нам или загляните в гости на чашечку чая со сладостями.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8 mb-16">
+        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition text-center">
+            <div class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6">📞</div>
+            <h3 class="font-bold text-gray-800 text-xl mb-2">Телефоны</h3>
+            <p class="text-gray-500 mb-1">+7 (900) 123-45-67</p>
+            <p class="text-gray-500">+7 (495) 782-22-21</p>
+            <p class="text-[10px] text-pink-400 font-bold uppercase mt-4 tracking-widest">Ежедневно с 9:00 до 21:00</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition text-center">
+            <div class="w-16 h-16 bg-yellow-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6">✉️</div>
+            <h3 class="font-bold text-gray-800 text-xl mb-2">Электронная почта</h3>
+            <p class="text-gray-500 mb-1">support@sweetworld.com</p>
+            <p class="text-gray-500">info@sweetworld.com</p>
+            <p class="text-[10px] text-yellow-500 font-bold uppercase mt-4 tracking-widest">Отвечаем в течение часа</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-md transition text-center">
+            <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6">📍</div>
+            <h3 class="font-bold text-gray-800 text-xl mb-2">Наш адрес</h3>
+            <p class="text-gray-500 mb-1">г. Москва, ул. Сладкая, д. 42</p>
+            <p class="text-gray-500">г. Москва, ул. Пушкина, д. 55</p>
+            <p class="text-[10px] text-blue-400 font-bold uppercase mt-4 tracking-widest">5 минут от метро</p>
+        </div>
+    </div>
+
+    <div class="relative w-full h-[500px] rounded-[3rem] overflow-hidden shadow-xl border-8 border-white bg-gray-100">
+        <div class="absolute inset-0 w-full h-full">
+            <script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3Ae8e01527ffbdc5e98c3519fff377049bedb1c05086f2500238c50caf270a3bd0&amp;width=1200&amp;height=500&amp;lang=ru_RU&amp;scroll=true"></script>
+        </div>
+        
+        <div class="flex items-center justify-center h-full text-gray-300">
+            Загрузка карты...
+        </div>
+    </div>
+</div>
+
+{% endblock %}
