@@ -6,7 +6,7 @@ from store import views as store_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", store_views.product_list, name="home"),
+    path("", store_views.home, name="home"),
     path("store/", include("store.urls")),
     path("cart/", include("cart.urls")),
     path("orders/", include("orders.urls")),

@@ -8,6 +8,12 @@ def cart_detail(request):
     cart = Cart(request)
     return render(request, "cart/cart.html", {"cart": cart})
 
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart = Cart(request)
+    cart.add(product=product, quantity=1)
+    # возвращаемся на страницу, с которой пришли
+    return redirect(request.META.get("HTTP_REFERER", "/"))
 
 @require_POST
 def cart_add(request, product_pk):

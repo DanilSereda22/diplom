@@ -1,8 +1,8 @@
 # apps/store/models.py
 from django.db import models
 from django.urls import reverse
-
-
+from django.db import models
+from django.conf import settings
 def product_image_upload_to(instance, filename):
     return f"products/{instance.category.slug if instance.category else 'misc'}/{filename}"
 
@@ -19,7 +19,6 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        # ✅ ИСПРАВЛЕНО
         return reverse("store:category_detail", args=[self.slug])
 
 
@@ -40,7 +39,6 @@ class SubCategory(models.Model):
         return f"{self.category.name} → {self.name}"
 
     def get_absolute_url(self):
-        # ✅ ИСПРАВЛЕНО (совпадает с urls.py)
         return reverse("store:subcategory", args=[self.slug])
 
 
@@ -68,3 +66,40 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse("store:product_detail", args=[self.slug])
+    
+class HomeSection(models.Model):
+    title = models.CharField("Заголовок секции", max_length=120)
+    slug = models.SlugField(unique=True)
+    products = models.ManyToManyField(
+        Product,
+        verbose_name="Товары",
+        blank=True
+    )
+    is_active = models.BooleanField("Активна", default=True)
+    order = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "Секция главной"
+        verbose_name_plural = "Секции главной"
+
+    def __str__(self):
+        return self.title
+
+class ShopReview(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        verbose_name="Пользователь"
+    )
+    text = models.TextField(verbose_name="Текст отзыва")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    is_approved = models.BooleanField(default=False, verbose_name="Одобрено админом")
+
+    class Meta:
+        verbose_name = "Отзыв о магазине"
+        verbose_name_plural = "Отзывы о магазине"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Отзыв от {self.user.username}"

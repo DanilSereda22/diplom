@@ -9,6 +9,15 @@
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
     body { background: #FFFDF5; color: #4A4A4A; font-family: 'Nunito', sans-serif; }
   </style>
+  <style>
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style>
 </head>
 <body class="min-h-screen flex flex-col">
   <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-pink-100">
@@ -25,6 +34,7 @@
 
       <nav class="flex items-center gap-4 md:gap-6">
         <a href="{% url 'store:product_list' %}" class="font-semibold hover:text-pink-500 transition">Каталог</a>
+        <a href="{% url 'store:about' %}" class="font-semibold hover:text-pink-500 transition">О нас</a>
         {% if user.is_authenticated %}
           <div class="relative group hidden sm:block">
             <a href="{% url 'users:profile' %}" class="font-semibold hover:text-pink-500 flex items-center gap-1">Кабинет</a>
@@ -58,6 +68,7 @@
       <div>
         <h3 class="font-bold text-lg mb-4">Покупателям</h3>
         <ul class="text-sm text-gray-500 space-y-2">
+          <li><a href="{% url 'store:about' %}" class="hover:text-pink-500">О магазине</a></li>
           <li><a href="{% url 'store:faq' %}" class="hover:text-pink-500">Вопросы и ответы</a></li>
           <li><a href="{% url 'store:privacy' %}" class="hover:text-pink-500">Политика конфиденциальности</a></li>
           <li><a href="{% url 'store:terms' %}" class="hover:text-pink-500">Пользовательское соглашение</a></li>
