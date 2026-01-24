@@ -50,7 +50,7 @@
 
           <div>
             <div class="flex gap-2 items-center">
-              <b>Заказ #{{ order.id }}</b>
+              <b>Заказ #{{ forloop.counter }}</b>
               <span class="text-xs px-2 py-1 rounded-full
                 {% if order.status == 'paid' %}
                   bg-green-100 text-green-600
@@ -67,13 +67,12 @@
 
           <div class="text-right">
             <div class="text-lg font-black">
-            {{ order.total_price }} ₽
+              {{ order.total_price }} ₽
             </div>
-
 
             {% if order.status == "processing" %}
             <a href="{% url 'orders:payment' order.id %}"
-               class="inline-block mt-2 px-4 py-2 text-sm rounded-xl
+              class="inline-block mt-2 px-4 py-2 text-sm rounded-xl
                       bg-gray-900 text-white hover:bg-pink-500">
               Оплатить
             </a>
@@ -83,8 +82,9 @@
         </div>
       </div>
       {% empty %}
-        <p class="text-center text-gray-400">Заказов пока нет</p>
+      <p class="text-center text-gray-400">Заказов пока нет</p>
       {% endfor %}
+
     </div>
 
   </div>

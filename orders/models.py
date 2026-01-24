@@ -12,6 +12,7 @@ class Order(models.Model):
     STATUS_CHOICES = (
         ("processing", "В обработке"),
         ("paid", "Оплачен"),
+        ("delivered", "Доставлен"),
     )
     @property
     def total_price(self):

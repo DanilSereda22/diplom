@@ -36,25 +36,60 @@
         <a href="{% url 'store:product_list' %}" class="font-semibold hover:text-pink-500 transition">Каталог</a>
         <a href="{% url 'store:about' %}" class="font-semibold hover:text-pink-500 transition">О нас</a>
         <a href="{% url 'store:contacts' %}" class="font-semibold hover:text-pink-500 transition">Контакты</a>
+
         {% if user.is_authenticated %}
+
+          {% if user.is_staff %}
+            <a href="{% url 'orders:courier_orders' %}" class="font-semibold hover:text-pink-500 transition">Доставка</a>
+          {% endif %}
+
           <div class="relative group hidden sm:block">
-            <a href="{% url 'users:profile' %}" class="font-semibold hover:text-pink-500 flex items-center gap-1">Кабинет</a>
+            <a href="{% url 'users:profile' %}"
+              class="font-semibold hover:text-pink-500 flex items-center gap-1">
+              Кабинет
+            </a>
+
             <div class="absolute right-0 hidden group-hover:block pt-2">
               <div class="bg-white shadow-xl rounded-xl border border-gray-100 p-2 w-48">
-                <a href="{% url 'users:profile' %}" class="block px-4 py-2 hover:bg-pink-50 rounded-lg text-sm">Профиль</a>
-                <form action="{% url 'users:logout' %}" method="post">{% csrf_token %}<button class="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm">Выйти</button></form>
+                <a href="{% url 'users:profile' %}"
+                  class="block px-4 py-2 hover:bg-pink-50 rounded-lg text-sm">
+                  Профиль
+                </a>
+                <form action="{% url 'users:logout' %}" method="post">
+                  {% csrf_token %}
+                  <button class="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm">
+                    Выйти
+                  </button>
+                </form>
               </div>
             </div>
           </div>
+
         {% else %}
           <a href="{% url 'users:login' %}" class="hidden sm:inline-block font-semibold">Войти</a>
-          <a href="{% url 'users:register' %}" class="hidden sm:inline-block bg-pink-500 text-white px-4 py-2 rounded-xl font-semibold hover:bg-pink-600 transition">Регистрация</a>
+          <a href="{% url 'users:register' %}"
+            class="hidden sm:inline-block bg-pink-500 text-white px-4 py-2 rounded-xl
+                    font-semibold hover:bg-pink-600 transition">
+            Регистрация
+          </a>
         {% endif %}
-        <a href="{% url 'cart:cart_detail' %}" class="relative bg-pink-50 p-2 rounded-full hover:bg-pink-100 transition">
-          <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-          {% if cart_counter %}<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">{{ cart_counter }}</span>{% endif %}
+
+        <a href="{% url 'cart:cart_detail' %}"
+          class="relative bg-pink-50 p-2 rounded-full hover:bg-pink-100 transition">
+          <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-width="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+          {% if cart_counter %}
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px]
+                        font-bold w-5 h-5 flex items-center justify-center rounded-full
+                        border-2 border-white">
+              {{ cart_counter }}
+            </span>
+          {% endif %}
         </a>
       </nav>
+
     </div>
   </header>
 

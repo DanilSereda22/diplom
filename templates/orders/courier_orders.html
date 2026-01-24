@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto">
+
+  <div class="flex justify-between items-center mb-8">
+    <h2 class="text-3xl font-black text-gray-800">Заказы на доставку</h2>
+    <a href="{% url 'orders:courier_orders' %}" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">Обновить</a>
+  </div>
+
+  <div class="space-y-6">
+    {% for order in orders %}
+      <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <div class="font-bold text-lg">Заказ №{{ order.id }}</div>
+            <div class="text-xs text-gray-400">
+              {{ order.created_at|date:"d.m.Y H:i" }}
+            </div>
+          </div>
+          <div class="font-black text-lg">
+            {{ order.total_price }} ₽
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+
+          <div>
+            <div class="text-gray-400 text-xs uppercase font-bold mb-1">Клиент</div>
+            <div class="font-bold">{{ order.first_name }} {{ order.last_name }}</div>
+            <div>{{ order.phone }}</div>
+            <div>{{ order.email }}</div>
+          </div>
+
+          <div>
+            <div class="text-gray-400 text-xs uppercase font-bold mb-1">
+              Адрес доставки
+            </div>
+            <div class="font-bold">{{ order.delivery_address }}</div>
+
+            {% if order.delivery_comment %}
+              <div class="mt-2 text-sm text-gray-600">
+                Комментарий: {{ order.delivery_comment }}
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <div class="mt-6 text-right">
+          <a href="{% url 'orders:complete_delivery' order.id %}" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">Завершить доставку</a>
+        </div>
+
+      </div>
+    {% empty %}
+      <div class="text-center text-gray-400 py-16 text-lg">
+        Нет заказов для доставки
+      </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+{% endblock %}

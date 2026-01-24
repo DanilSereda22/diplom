@@ -1,12 +1,50 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db import transaction
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from .forms import CheckoutForm
 from .models import Order, OrderItem
 from cart.cart import Cart
+from django.contrib.admin.views.decorators import staff_member_required
 
+def is_courier(user):
+    return user.is_staff
 
+@login_required
+@user_passes_test(is_courier)
+def courier_orders(request):
+    orders = Order.objects.filter(
+        delivery_method='delivery',
+        status='paid'
+    ).order_by('-created_at')
+
+    return render(request, 'orders/courier_orders.html', {
+        'orders': orders
+    })
+@staff_member_required
+def complete_delivery_view(request, order_id):
+    order = get_object_or_404(
+        Order,
+        id=order_id,
+        delivery_method="delivery",
+        status="paid"
+    )
+
+    order.status = "delivered"
+    order.save()
+
+    return redirect("orders:courier_orders")
+
+@staff_member_required(login_url="login")
+def courier_orders_view(request):
+    orders = Order.objects.filter(
+        delivery_method="delivery",
+        status="paid"
+    ).order_by("-created_at")
+
+    return render(request, "orders/courier_orders.html", {
+        "orders": orders
+    })
 def checkout_view(request):
     cart = Cart(request)
 

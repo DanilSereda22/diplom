@@ -3,6 +3,22 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from .forms import RegisterForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+
+
+class CustomLoginView(LoginView):
+    template_name = "users/login.html"
+
+    def get_success_url(self):
+        user = self.request.user
+        if user.is_staff:
+            return "/orders/courier/"
+        return "/users/profile/"
+
+def profile_redirect(request):
+    if request.user.is_staff:
+        return redirect("orders:courier_orders")
+    return redirect("users:profile")
 
 def register_view(request):
     if request.method == "POST":
