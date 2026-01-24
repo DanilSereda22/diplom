@@ -16,11 +16,12 @@ def about_page(request):
             text = request.POST.get('text')
             if text:
                 ShopReview.objects.create(user=request.user, text=text)
-                return redirect('store:about') # замените на ваш URL name
+                return redirect('store:about')
         else:
-            return redirect('login') # или на страницу регистрации
+            return redirect('login') 
 
     return render(request, 'pages/about.html', {'reviews': reviews})
+
 def home(request):
     sections = HomeSection.objects.filter(is_active=True).prefetch_related(
         "products"
@@ -35,7 +36,6 @@ def section_detail(request, slug):
         slug=slug,
         is_active=True
     )
-
     return render(request, "pages/section_detail.html", {
         "section": section,
         "products": section.products.filter(available=True),
@@ -51,16 +51,13 @@ def product_list(request):
             products = products.filter(
                 Q(name__icontains=q) | Q(description__icontains=q)
             )
-
     paginator = Paginator(products, 12)
     page = request.GET.get("page")
     products = paginator.get_page(page)
-
     return render(request, "store/product_list.html", {
         "products": products,
         "form": form,
     })
-
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, available=True)
@@ -68,36 +65,29 @@ def product_detail(request, slug):
         "product": product
     })
 
-
 def category_view(request, slug):
     category = get_object_or_404(Category, slug=slug)
     subcategories = category.subcategories.all()
     products = Product.objects.filter(category__in=subcategories, available=True)
-
     return render(request, "store/category.html", {
         "category": category,
         "products": products,
         "subcategories": subcategories,
     })
 
-
 def subcategory_view(request, slug):
     subcategory = get_object_or_404(SubCategory, slug=slug)
     products = Product.objects.filter(category=subcategory, available=True)
-
     return render(request, "store/subcategory.html", {
         "subcategory": subcategory,
         "products": products,
     })
 
-
 def faq(request):
     return render(request, "pages/faq.html")
 
-
 def privacy(request):
     return render(request, "pages/privacy.html")
-
 
 def terms(request):
     return render(request, "pages/terms.html")
@@ -106,14 +96,13 @@ def contacts_page(request):
     return render(request, 'pages/contacts.html')
 
 ##Админка
-
-
 def staff_required(view_func):
     return user_passes_test(lambda u: u.is_staff, login_url='users:login')(view_func)
 
 @staff_required
 def admin_dashboard(request):
     return render(request, "admin/dashboard.html")
+
 # ТОВАРЫ
 @staff_required
 def admin_products(request):
@@ -190,7 +179,6 @@ def admin_delete_category(request, pk):
     messages.success(request, "Категория удалена")
     return redirect("store:admin_categories")
 
-
 # ПОДКАТЕГОРИИ
 @staff_required
 def admin_subcategories(request):
@@ -236,7 +224,6 @@ def admin_sections(request):
     sections = HomeSection.objects.all().order_by('order')
     return render(request, "store/admin/sections.html", {"sections": sections})
 
-
 @staff_required
 def admin_add_section(request):
     if request.method == "POST":
@@ -248,7 +235,6 @@ def admin_add_section(request):
     else:
         form = HomeSectionForm()
     return render(request, "store/admin/section_form.html", {"form": form, "title": "Добавить секцию"})
-
 
 @staff_required
 def admin_edit_section(request, pk):
@@ -263,7 +249,6 @@ def admin_edit_section(request, pk):
         form = HomeSectionForm(instance=section)
     return render(request, "store/admin/section_form.html", {"form": form, "title": "Редактировать секцию"})
 
-
 @staff_required
 def admin_delete_section(request, pk):
     section = get_object_or_404(HomeSection, pk=pk)
@@ -277,7 +262,6 @@ def admin_reviews(request):
     reviews = ShopReview.objects.all().order_by('-created_at')
     return render(request, "store/admin/reviews.html", {"reviews": reviews})
 
-
 @staff_required
 def admin_approve_review(request, pk):
     review = get_object_or_404(ShopReview, pk=pk)
@@ -285,7 +269,6 @@ def admin_approve_review(request, pk):
     review.save()
     messages.success(request, "Отзыв одобрен")
     return redirect("store:admin_reviews")
-
 
 @staff_required
 def admin_delete_review(request, pk):

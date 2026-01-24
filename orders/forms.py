@@ -1,9 +1,7 @@
 from django import forms
 from .models import Order
 
-
 BASE_INPUT = "w-full p-3 rounded-xl border border-gray-200 bg-gray-50"
-
 
 class CheckoutForm(forms.ModelForm):
     class Meta:

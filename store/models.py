@@ -1,4 +1,4 @@
-# apps/store/models.py
+# store/models.py
 from django.db import models
 from django.urls import reverse
 from django.db import models

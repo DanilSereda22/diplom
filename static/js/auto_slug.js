@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-    // Карта транслитерации с кириллицы на латиницу
     const cyrillicToLatinMap = {
         "а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"e",
         "ж":"zh","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m",
@@ -14,11 +12,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (cyrillicToLatinMap[char]) return cyrillicToLatinMap[char];
             else if (/[a-z0-9]/.test(char)) return char;
             else if (char === " " || char === "-" ) return "-";
-            else return ""; // убрать остальные символы
+            else return ""; 
         }).join('').replace(/-+/g, "-").replace(/^-+|-+$/g, "");
     }
 
-    // Найти все пары "name/title" и "slug" на странице
     const slugPairs = [
         { source: "name", target: "slug" },
         { source: "title", target: "slug" }

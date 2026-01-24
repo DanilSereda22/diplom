@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from store.models import Product
 
-
 class Order(models.Model):
     DELIVERY_CHOICES = (
         ("pickup", "Самовывоз"),
@@ -57,8 +56,6 @@ class Order(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
-
-
 
 class OrderItem(models.Model):
     order = models.ForeignKey(

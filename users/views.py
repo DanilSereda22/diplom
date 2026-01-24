@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib.auth.views import LoginView
 from .models import CustomUser
 
-
 class CustomLoginView(LoginView):
     template_name = "users/login.html"
 
@@ -17,7 +16,6 @@ class CustomLoginView(LoginView):
         if user.is_staff:
             return "/orders/courier/"
         return "/users/profile/"
-
 
 def profile_redirect(request):
     if request.user.is_staff:
@@ -45,7 +43,6 @@ def profile_view(request):
         user.address = request.POST.get("address", user.address)
         user.save()
         return redirect("users:profile")
-
     return render(request, "users/profile.html", {"user": user})
 
 ## Админка
@@ -53,11 +50,9 @@ def profile_view(request):
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
 
-
 @user_passes_test(is_admin)
 def admin_dashboard(request):
     return render(request, "admin/dashboard.html")
-
 
 @user_passes_test(is_admin)
 def admin_users_view(request):
@@ -66,11 +61,9 @@ def admin_users_view(request):
         "users": users
     })
 
-
 @user_passes_test(is_admin)
 def admin_edit_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
-
     if request.method == "POST":
         user.username = request.POST.get("username")
         user.first_name = request.POST.get("first_name")
@@ -78,25 +71,19 @@ def admin_edit_user(request, user_id):
         user.email = request.POST.get("email")
         user.phone = request.POST.get("phone")
         user.address = request.POST.get("address")
-
         user.is_staff = bool(request.POST.get("is_staff"))
         user.is_superuser = bool(request.POST.get("is_superuser"))
-
         user.save()
         return redirect("users:admin_users")
-
     return render(request, "users/admin_edit_user.html", {
         "user_obj": user
     })
 
-
 @user_passes_test(is_admin)
 def admin_delete_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
-
     if request.method == "POST":
         user.delete()
-
     return redirect("users:admin_users")
 
 @user_passes_test(is_admin)
@@ -108,7 +95,6 @@ def admin_add_user(request):
             return redirect("users:admin_users")
     else:
         form = RegisterForm()
-
     return render(request, "users/admin_add_user.html", {
         "form": form
     })

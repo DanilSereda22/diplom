@@ -12,26 +12,21 @@ def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart = Cart(request)
     cart.add(product=product, quantity=1)
-    # возвращаемся на страницу, с которой пришли
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
 @require_POST
 def cart_add(request, product_pk):
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_pk, available=True)
-
     quantity = int(request.POST.get("quantity", 1))
     override = request.POST.get("override") == "true"
-
     current_qty = cart.get_product_quantity(product)
-    
+
     if override:
-        # заменяем количество полностью
         if quantity > product.stock:
             quantity = product.stock
             messages.error(request, f"Осталось только {product.stock} шт.")
     else:
-        # добавляем к текущему количеству
         if current_qty + quantity > product.stock:
             quantity = product.stock - current_qty
             if quantity <= 0:
@@ -40,8 +35,6 @@ def cart_add(request, product_pk):
 
     cart.add(product=product, quantity=quantity, override_quantity=override)
     return redirect("cart:cart_detail")
-
-
 
 @require_POST
 def cart_remove(request, product_pk):
