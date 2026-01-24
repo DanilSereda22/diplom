@@ -3,10 +3,15 @@ from django import forms
 from .models import Product, Category, SubCategory, HomeSection
 
 class SearchForm(forms.Form):
-    q = forms.CharField(max_length=255, required=False, widget=forms.TextInput(attrs={
-        "placeholder": "Поиск по товарам...",
-        "class": "w-full p-2 rounded border",
-    }))
+    q = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={
+            "placeholder": "Поиск по товарам...",
+            "class": "w-full p-2 rounded border",
+        })
+    )
+
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -18,8 +23,12 @@ class ProductForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
+        for field_name, field in self.fields.items():
+            # Ставим класс для всех полей
             field.widget.attrs.update({"class": "w-full p-2 rounded border"})
+            # Делам slug readonly
+            if field_name == "slug":
+                field.widget.attrs.update({"readonly": "readonly"})
 
 
 class CategoryForm(forms.ModelForm):
@@ -29,8 +38,10 @@ class CategoryForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
+        for field_name, field in self.fields.items():
             field.widget.attrs.update({"class": "w-full p-2 rounded border"})
+            if field_name == "slug":
+                field.widget.attrs.update({"readonly": "readonly"})
 
 
 class SubCategoryForm(forms.ModelForm):
@@ -40,8 +51,10 @@ class SubCategoryForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
+        for field_name, field in self.fields.items():
             field.widget.attrs.update({"class": "w-full p-2 rounded border"})
+            if field_name == "slug":
+                field.widget.attrs.update({"readonly": "readonly"})
 
 
 class HomeSectionForm(forms.ModelForm):
@@ -49,7 +62,7 @@ class HomeSectionForm(forms.ModelForm):
         model = HomeSection
         fields = ["title", "slug", "products", "is_active", "order"]
         widgets = {
-            "products": forms.CheckboxSelectMultiple
+            "products": forms.CheckboxSelectMultiple,
         }
 
     def __init__(self, *args, **kwargs):
@@ -57,3 +70,5 @@ class HomeSectionForm(forms.ModelForm):
         for field_name, field in self.fields.items():
             if field_name != "products":
                 field.widget.attrs.update({"class": "w-full p-2 rounded border"})
+            if field_name == "slug":
+                field.widget.attrs.update({"readonly": "readonly"})

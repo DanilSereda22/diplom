@@ -58,7 +58,7 @@
               {{ p.name }}
             </h3>
             
-            <span class="text-xl font-black text-gray-900">{{ p.price }} ₽</span>
+            <span class="text-xl font-black text-gray-900">{{ p.price }}&nbsp;₽</span>
           </a>
 
           <form method="POST" action="{% url 'cart:add_to_cart' p.id %}" class="absolute bottom-5 right-5">

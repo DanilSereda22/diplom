@@ -4,40 +4,33 @@
 <div class="max-w-3xl mx-auto space-y-6">
 
   <h1 class="text-3xl font-black">
-    Редактирование пользователя
+    Добавить пользователя
   </h1>
 
   <form method="post" class="bg-white border rounded-3xl p-6 space-y-4">
     {% csrf_token %}
+    
+    {{ form.non_field_errors }}
 
-    <input name="username" value="{{ user_obj.username }}" class="input" placeholder="Логин">
-    <input name="first_name" value="{{ user_obj.first_name }}" class="input" placeholder="Имя">
-    <input name="last_name" value="{{ user_obj.last_name }}" class="input" placeholder="Фамилия">
-    <input name="email" value="{{ user_obj.email }}" class="input" placeholder="Email">
-    <input name="phone" value="{{ user_obj.phone }}" class="input" placeholder="Телефон">
-    <input name="address" value="{{ user_obj.address }}" class="input" placeholder="Адрес">
-
-    <div class="flex gap-6 text-sm">
-      <label>
-        <input type="checkbox" name="is_staff" {% if user_obj.is_staff %}checked{% endif %}>
-        Курьер
-      </label>
-
-      <label>
-        <input type="checkbox" name="is_superuser" {% if user_obj.is_superuser %}checked{% endif %}>
-        Админ
-      </label>
-    </div>
+    {% for field in form %}
+      <div>
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.errors %}
+          <p class="text-red-500 text-sm">{{ field.errors }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
 
     <button class="px-6 py-3 bg-gray-900 text-white rounded-xl font-bold">
-      Сохранить
+      Создать пользователя
     </button>
   </form>
 
 </div>
 
 <style>
-.input{
+input, select {
   width:100%;
   padding:.5rem;
   border-radius:.75rem;

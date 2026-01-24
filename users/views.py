@@ -98,3 +98,17 @@ def admin_delete_user(request, user_id):
         user.delete()
 
     return redirect("users:admin_users")
+
+@user_passes_test(is_admin)
+def admin_add_user(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("users:admin_users")
+    else:
+        form = RegisterForm()
+
+    return render(request, "users/admin_add_user.html", {
+        "form": form
+    })

@@ -56,7 +56,7 @@
           <h3 class="font-bold text-gray-800 text-sm md:text-base mb-2 h-12 line-clamp-2 leading-tight group-hover:text-pink-600 transition">
             {{ p.name }}
           </h3>
-          <span class="text-xl font-black text-gray-900">{{ p.price }} ₽</span>
+          <span class="text-xl font-black text-gray-900">{{ p.price }}&nbsp;₽</span>
         </a>
 
         <form method="POST" action="{% url 'cart:add_to_cart' p.id %}" class="absolute bottom-5 right-5">
