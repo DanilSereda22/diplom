@@ -59,9 +59,27 @@ f("card").oninput = e =>
 
 /* DATE MM/YY */
 f("date").oninput = e => {
-  let v = e.target.value.replace(/\D/g,'').slice(0,4);
-  e.target.value = v.length > 2 ? v.slice(0,2)+'/'+v.slice(2) : v;
+  let v = e.target.value.replace(/\D/g,'').slice(0,4); // только цифры, максимум 4
+  let month = v.slice(0,2);
+  let year = v.slice(2,4);
+
+  // Ограничение месяца 01-12
+  if(month.length === 2){
+    let m = parseInt(month);
+    if(m < 1) month = "01";
+    else if(m > 12) month = "12";
+  }
+
+  // Ограничение года 26-99
+  if(year.length === 2){
+    let y = parseInt(year);
+    if(y < 26) year = "26";
+    else if(y > 99) year = "99";
+  }
+
+  e.target.value = month + (year ? '/' + year : '');
 };
+
 
 /* CVC */
 f("cvc").oninput = e =>
