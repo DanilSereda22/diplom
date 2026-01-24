@@ -1,36 +1,90 @@
 {% extends "base.html" %}
+
 {% block content %}
 <div class="max-w-5xl mx-auto px-4">
   <h2 class="text-3xl font-black mb-8 text-gray-800">Оформление заказа</h2>
 
   <div class="grid md:grid-cols-2 gap-10 items-start">
-    <form method="post" id="checkout-form" class="space-y-6">
+
+    <!-- ФОРМА -->
+    <form method="post" class="space-y-6">
       {% csrf_token %}
 
-      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-6">
+
+        <!-- Контактные данные -->
         <h3 class="font-bold text-lg">Контактные данные</h3>
 
-        {% for f in form %}
+        <!-- Имя -->
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
+            Имя
+          </label>
+          {{ form.first_name }}
+        </div>
+
+        <!-- Фамилия -->
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
+            Фамилия
+          </label>
+          {{ form.last_name }}
+        </div>
+
+        <!-- Телефон -->
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
+            Номер телефона
+          </label>
+          {{ form.phone }}
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
+            Электронная почта
+          </label>
+          {{ form.email }}
+        </div>
+
+        <!-- Способ получения -->
+        <h3 class="font-bold text-lg pt-2">Способ получения</h3>
+
+        <div>
+          {{ form.delivery_method }}
+        </div>
+
+        <!-- ДОСТАВКА -->
+        <div id="delivery-fields" class="hidden space-y-4">
+
+          <!-- Адрес -->
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 ml-1">
-              {{ f.label }}
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
+              Адрес доставки
             </label>
-
-            {{ f }}
-
-            {% if f.errors %}
-              <p class="text-red-500 text-xs mt-1">{{ f.errors.0 }}</p>
-            {% endif %}
+            {{ form.delivery_address }}
           </div>
-        {% endfor %}
+
+          <!-- Комментарий -->
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
+              Комментарий к доставке
+            </label>
+            {{ form.delivery_comment }}
+          </div>
+
+        </div>
+
       </div>
 
       <button type="submit"
-        class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-pink-500 shadow-xl shadow-pink-100 hover:-translate-y-0.5 transition-all">
+        class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg
+               hover:bg-pink-500 shadow-xl transition-all">
         Подтвердить заказ
       </button>
     </form>
 
+    <!-- КОРЗИНА -->
     <div class="bg-gray-50 p-6 rounded-[2rem] border-2 border-dashed border-gray-200 sticky top-24">
       <h3 class="font-bold text-lg mb-4">Ваш заказ</h3>
 
@@ -38,12 +92,12 @@
         {% for item in cart %}
         <li class="flex justify-between items-center text-sm">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-white rounded-xl p-1 border border-gray-100 shrink-0">
+            <div class="w-12 h-12 bg-white rounded-xl p-1 border border-gray-100">
               {% if item.product.image %}
                 <img src="{{ item.product.image.url }}" class="w-full h-full object-contain">
               {% endif %}
             </div>
-            <div class="leading-tight">
+            <div>
               <p class="font-bold text-gray-800">{{ item.product.name }}</p>
               <p class="text-gray-400">Кол-во: {{ item.quantity }}</p>
             </div>
@@ -53,11 +107,47 @@
         {% endfor %}
       </ul>
 
-      <div class="border-t border-gray-200 pt-4 flex justify-between items-center">
+      <div class="border-t pt-4 flex justify-between">
         <span class="text-gray-500 font-bold">Итого:</span>
-        <span class="text-2xl font-black text-gray-900">{{ cart.get_total_price }}&nbsp;₽</span>
+        <span class="text-2xl font-black">{{ cart.get_total_price }}&nbsp;₽</span>
       </div>
     </div>
+
   </div>
 </div>
+
+<!-- JS -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const select = document.querySelector('select[name="delivery_method"]');
+  const fields = document.getElementById("delivery-fields");
+
+  function toggleFields() {
+    fields.classList.toggle("hidden", select.value !== "delivery");
+  }
+
+  select.addEventListener("change", toggleFields);
+  toggleFields();
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("phone");
+  if (!input) return;
+
+  function mask(e) {
+    let x = input.value.replace(/\D/g, "").substring(1);
+    let res = "+7 (";
+    if (x.length > 0) res += x.substring(0,3);
+    if (x.length >= 3) res += ") " + x.substring(3,6);
+    if (x.length >= 6) res += "-" + x.substring(6,8);
+    if (x.length >= 8) res += "-" + x.substring(8,10);
+    input.value = res;
+  }
+
+  input.addEventListener("input", mask);
+});
+</script>
+
 {% endblock %}

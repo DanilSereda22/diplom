@@ -1,122 +1,113 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="flex items-center gap-4 mb-8">
-        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-pink-200 to-blue-200 flex items-center justify-center text-2xl font-bold text-white shadow-inner">
-            {{ user.first_name|first|default:user.username|first|upper }}
+
+<div class="max-w-4xl mx-auto space-y-8">
+
+  <!-- HEADER -->
+  <div class="flex items-center gap-4">
+    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-pink-200 to-blue-200
+                flex items-center justify-center text-2xl font-bold text-white">
+      {{ user.first_name|first|default:user.username|first|upper }}
+    </div>
+    <div>
+      <h2 class="text-2xl font-bold">Привет, {{ user.first_name|default:user.username }}!</h2>
+      <p class="text-gray-500">Личный кабинет</p>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-8">
+
+    <!-- PROFILE -->
+    <form method="post"
+          class="bg-white p-6 rounded-3xl border space-y-4 md:col-span-1">
+      {% csrf_token %}
+      <h3 class="font-bold text-lg">Личные данные</h3>
+
+      <input name="first_name" value="{{ user.first_name }}"
+             placeholder="Имя" class="input">
+
+      <input name="last_name" value="{{ user.last_name }}"
+             placeholder="Фамилия" class="input">
+
+      <input id="phone" name="phone" value="{{ user.phone }}"
+             placeholder="Телефон" class="input">
+
+      <input name="address" value="{{ user.address }}"
+             placeholder="Адрес доставки" class="input">
+
+      <button class="w-full bg-gray-900 text-white py-2 rounded-xl font-bold hover:bg-pink-500">
+        Сохранить
+      </button>
+    </form>
+
+    <!-- ORDERS -->
+    <div class="bg-white p-6 rounded-3xl border md:col-span-2">
+      <h3 class="font-bold text-lg mb-4">История заказов</h3>
+
+      {% for order in user.orders.all %}
+      <div class="p-4 rounded-2xl border mb-3 hover:bg-pink-50/30">
+        <div class="flex justify-between items-start">
+
+          <div>
+            <div class="flex gap-2 items-center">
+              <b>Заказ #{{ order.id }}</b>
+              <span class="text-xs px-2 py-1 rounded-full
+                {% if order.status == 'paid' %}
+                  bg-green-100 text-green-600
+                {% else %}
+                  bg-yellow-100 text-yellow-600
+                {% endif %}">
+                {{ order.get_status_display }}
+              </span>
+            </div>
+            <div class="text-xs text-gray-400">
+              {{ order.created_at|date:"d.m.Y H:i" }}
+            </div>
+          </div>
+
+          <div class="text-right">
+            <div class="text-lg font-black">
+            {{ order.total_price }} ₽
+            </div>
+
+
+            {% if order.status == "processing" %}
+            <a href="{% url 'orders:payment' order.id %}"
+               class="inline-block mt-2 px-4 py-2 text-sm rounded-xl
+                      bg-gray-900 text-white hover:bg-pink-500">
+              Оплатить
+            </a>
+            {% endif %}
+          </div>
+
         </div>
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">Привет, {{ user.first_name|default:user.username }}! 👋</h2>
-            <p class="text-gray-500">Добро пожаловать в личный кабинет</p>
-        </div>
+      </div>
+      {% empty %}
+        <p class="text-center text-gray-400">Заказов пока нет</p>
+      {% endfor %}
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        <div class="md:col-span-1">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <h3 class="font-bold text-lg mb-4 text-gray-800">Личные данные</h3>
-                <form method="post" class="space-y-4">
-                    {% csrf_token %}
-                    
-                    <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase">Имя</label>
-                        <input name="first_name" value="{{ user.first_name }}" 
-                               class="w-full p-2 rounded-lg border border-gray-200 focus:border-pink-300 outline-none bg-gray-50 focus:bg-white">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase">Фамилия</label>
-                        <input name="last_name" value="{{ user.last_name }}" 
-                               class="w-full p-2 rounded-lg border border-gray-200 focus:border-pink-300 outline-none bg-gray-50 focus:bg-white">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase">Телефон</label>
-                        <input id="phone" name="phone" value="{{ user.phone }}" 
-                               class="w-full p-2 rounded-lg border border-gray-200 focus:border-pink-300 outline-none bg-gray-50 focus:bg-white">
-                    </div>
-
-                    <button class="w-full bg-gray-900 text-white py-2 rounded-xl font-bold hover:bg-pink-500 transition">
-                        Сохранить
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div class="md:col-span-2">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-full">
-                <h3 class="font-bold text-lg mb-4 text-gray-800">История заказов</h3>
-                
-                <div class="space-y-4">
-                    {% for order in user.orders.all %}
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-gray-100 hover:border-pink-100 hover:bg-pink-50/30 transition">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="font-bold text-gray-800">Заказ #{{ order.pk }}</span>
-                                <span class="text-xs px-2 py-1 rounded-full 
-                                    {% if order.status == 'paid' %}bg-green-100 text-green-600
-                                    {% elif order.status == 'created' %}bg-yellow-100 text-yellow-600
-                                    {% else %}bg-gray-100 text-gray-500{% endif %}">
-                                    {{ order.get_status_display }}
-                                </span>
-                            </div>
-                            <div class="text-xs text-gray-400">{{ order.created_at|date:"d E Y, H:i" }}</div>
-                        </div>
-                        <div class="mt-2 sm:mt-0 font-bold text-lg text-gray-700">
-                            {{ order.total_price }} ₽
-                        </div>
-                    </div>
-                    {% empty %}
-                        <div class="text-center py-10 text-gray-400">
-                            <p>У вас пока нет заказов.</p>
-                            <a href="{% url 'store:product_list' %}" class="text-pink-500 hover:underline text-sm">Перейти в каталог</a>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-    </div>
+  </div>
 </div>
 
-<!-- === МАСКА ДЛЯ ТЕЛЕФОНА +7 (999) 999-99-99 === -->
+<!-- PHONE MASK -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const input = document.getElementById("phone");
-
-    function setCursorPosition(pos, elem) {
-        elem.focus();
-        if (elem.setSelectionRange) elem.setSelectionRange(pos, pos);
-    }
-
-    function mask(event) {
-        let matrix = "+7 (___) ___-__-__";
-        let i = 0;
-        let def = matrix.replace(/\D/g, "");
-        let val = this.value.replace(/\D/g, "");
-
-        if (def.length >= val.length) val = def;
-
-        this.value = matrix.replace(/./g, function (char) {
-            return /[_\d]/.test(char) && i < val.length
-                ? val.charAt(i++)
-                : i >= val.length
-                ? ""
-                : char;
-        });
-
-        if (event.type === "blur") {
-            if (this.value.length < 4) this.value = "";
-        } else {
-            setCursorPosition(this.value.length, this);
-        }
-    }
-
-    input.addEventListener("input", mask, false);
-    input.addEventListener("focus", mask, false);
-    input.addEventListener("blur", mask, false);
+document.getElementById("phone")?.addEventListener("input", e => {
+  let v = e.target.value.replace(/\D/g,'').slice(1);
+  e.target.value = "+7 ("+v.slice(0,3)+(v[3]?") ":"")+
+                   v.slice(3,6)+(v[6]?"-":"")+
+                   v.slice(6,8)+(v[8]?"-":"")+v.slice(8,10);
 });
 </script>
+
+<style>
+.input{
+  width:100%;
+  padding:.5rem;
+  border-radius:.75rem;
+  border:1px solid #e5e7eb;
+  background:#f9fafb;
+}
+</style>
+
 {% endblock %}

@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.db import models
 from django.conf import settings
+
 def product_image_upload_to(instance, filename):
     return f"products/{instance.category.slug if instance.category else 'misc'}/{filename}"
 

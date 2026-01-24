@@ -1,4 +1,4 @@
-# apps/users/urls.py
+# users/urls.py
 from django.urls import path, reverse_lazy
 from . import views
 from .forms import CustomPasswordResetForm

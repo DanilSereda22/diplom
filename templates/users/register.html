@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <div class="flex items-center justify-center py-12">
     <div class="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-pink-100">
-        
+
         <div class="text-center mb-8">
-            <div class="w-16 h-16 bg-gradient-to-tr from-pink-100 to-yellow-100 text-2xl flex items-center justify-center rounded-full mx-auto mb-4 shadow-sm">✨</div>
+            <div class="w-16 h-16 bg-gradient-to-tr from-pink-100 to-yellow-100 text-2xl flex items-center justify-center rounded-full mx-auto mb-4 shadow-sm">
+                ✨
+            </div>
             <h2 class="text-2xl font-bold text-gray-800">Создать аккаунт</h2>
             <p class="text-gray-500 text-sm">Присоединяйтесь к миру сладостей!</p>
         </div>
 
         <form method="post" class="space-y-4">
             {% csrf_token %}
-            
+
             {% if form.non_field_errors %}
                 <div class="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">
                     {{ form.non_field_errors }}
@@ -20,41 +23,47 @@
             {% endif %}
 
             {% for field in form %}
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1 ml-1" for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-                
-                {{ field }}
-                
-                {% if field.errors %}
-                    <p class="text-red-500 text-xs mt-1 ml-1">{{ field.errors.0 }}</p>
-                {% endif %}
-                
-                {% if field.help_text %}
-                    <p class="text-gray-400 text-xs mt-1 ml-1 leading-tight">{{ field.help_text }}</p>
-                {% endif %}
-            </div>
+                <div>
+                    <label
+                        class="block text-sm font-bold text-gray-700 mb-1 ml-1"
+                        for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <p class="text-red-500 text-xs mt-1 ml-1">
+                            {{ field.errors.0 }}
+                        </p>
+                    {% endif %}
+
+                    {% if field.help_text %}
+                        <p class="text-gray-400 text-xs mt-1 ml-1 leading-tight">
+                            {{ field.help_text }}
+                        </p>
+                    {% endif %}
+                </div>
             {% endfor %}
 
             <style>
-                input[type="text"], 
-                input[type="password"], 
-                input[type="email"], 
-                input[type="number"] {
+                input[type="text"],
+                input[type="password"],
+                input[type="email"],
+                input[type="tel"] {
                     width: 100%;
                     padding: 12px 16px;
                     border-radius: 12px;
-                    border: 1px solid #E5E7EB; 
-                    background-color: #F9FAFB; 
+                    border: 1px solid #E5E7EB;
+                    background-color: #F9FAFB;
                     outline: none;
                     transition: all 0.2s;
                     color: #374151;
                 }
-                
+
                 input:focus {
                     background-color: #ffffff;
-                    border-color: #F9A8D4; 
+                    border-color: #F9A8D4;
                     box-shadow: 0 0 0 4px #FCE7F3;
                 }
 
@@ -66,14 +75,63 @@
                 }
             </style>
 
-            <button type="submit" class="w-full mt-6 bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-pink-500 shadow-lg hover:shadow-pink-200 transition-all transform hover:-translate-y-0.5">
+            <button
+                type="submit"
+                class="w-full mt-6 bg-gray-900 text-white font-bold py-3 rounded-xl
+                       hover:bg-pink-500 shadow-lg hover:shadow-pink-200
+                       transition-all transform hover:-translate-y-0.5">
                 Зарегистрироваться
             </button>
         </form>
 
         <div class="mt-6 text-center text-sm text-gray-500">
-            Уже есть аккаунт? <a href="{% url 'users:login' %}" class="text-pink-600 font-bold hover:underline">Войти</a>
+            Уже есть аккаунт?
+            <a href="{% url 'users:login' %}"
+               class="text-pink-600 font-bold hover:underline">
+                Войти
+            </a>
         </div>
+
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.querySelector('input[name="phone"]');
+    if (!input) return;
+
+    function setCursorPosition(pos) {
+        input.focus();
+        input.setSelectionRange(pos, pos);
+    }
+
+    function mask(e) {
+        const matrix = "+7 (___) ___-__-__";
+        let i = 0;
+        let def = matrix.replace(/\D/g, "");
+        let val = input.value.replace(/\D/g, "");
+
+        if (val.length < def.length) val = def;
+
+        input.value = matrix.replace(/./g, function (a) {
+            return /[_\d]/.test(a) && i < val.length
+                ? val.charAt(i++)
+                : i >= val.length
+                ? ""
+                : a;
+        });
+
+        if (e.type !== "blur") {
+            setCursorPosition(input.value.length);
+        } else if (input.value.length < 5) {
+            input.value = "";
+        }
+    }
+
+    input.addEventListener("input", mask);
+    input.addEventListener("focus", mask);
+    input.addEventListener("blur", mask);
+});
+</script>
+
 {% endblock %}

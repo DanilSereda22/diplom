@@ -1,9 +1,8 @@
+# users/forms.py
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
-from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import PasswordResetForm
+from .models import CustomUser
 
 User = get_user_model()
 
@@ -16,9 +15,16 @@ class CustomPasswordResetForm(PasswordResetForm):
             )
         return email
 
+
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     phone = forms.CharField(required=False, max_length=30)
+    address = forms.CharField(
+        required=False,
+        max_length=255,
+        widget=forms.TextInput(attrs={"placeholder": "Адрес доставки"}),
+    )
+
     class Meta:
         model = CustomUser
         fields = (
@@ -27,17 +33,22 @@ class RegisterForm(UserCreationForm):
             "last_name",
             "email",
             "phone",
+            "address",
             "password1",
             "password2",
         )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs.setdefault("class", "w-full p-2 rounded border")
+            field.widget.attrs.setdefault(
+                "class", "w-full p-2 rounded border"
+            )
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.phone = self.cleaned_data.get("phone")
+        user.address = self.cleaned_data.get("address")
         if commit:
             user.save()
         return user
