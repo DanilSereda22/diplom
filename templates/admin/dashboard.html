@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto space-y-10">
+
+  <h1 class="text-4xl font-black text-center">
+    Панель администратора
+  </h1>
+
+  <div class="grid md:grid-cols-3 gap-6">
+
+    <!-- ЗАКАЗЫ -->
+    <a href="{% url 'orders:admin_orders' %}"
+       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
+      <div class="text-5xl mb-4">📦</div>
+      <h2 class="text-xl font-bold group-hover:text-pink-500">
+        Заказы
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Просмотр и управление заказами
+      </p>
+    </a>
+
+    <!-- ПОЛЬЗОВАТЕЛИ -->
+    <a href="{% url 'users:admin_users' %}"
+       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
+      <div class="text-5xl mb-4">👤</div>
+      <h2 class="text-xl font-bold group-hover:text-pink-500">
+        Пользователи
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Управление аккаунтами
+      </p>
+    </a>
+
+    <!-- ТОВАРЫ -->
+    <a href="{% url 'store:admin_products' %}"
+       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
+      <div class="text-5xl mb-4">🛒</div>
+      <h2 class="text-xl font-bold group-hover:text-pink-500">
+        Товары
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Добавление, редактирование и удаление товаров
+      </p>
+    </a>
+
+    <!-- КАТЕГОРИИ -->
+    <a href="{% url 'store:admin_categories' %}"
+       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
+      <div class="text-5xl mb-4">📂</div>
+      <h2 class="text-xl font-bold group-hover:text-pink-500">
+        Категории
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Управление категориями товаров
+      </p>
+    </a>
+
+    <!-- ПОДКАТЕГОРИИ -->
+    <a href="{% url 'store:admin_subcategories' %}"
+       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
+      <div class="text-5xl mb-4">📑</div>
+      <h2 class="text-xl font-bold group-hover:text-pink-500">
+        Подкатегории
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Управление подкатегориями
+      </p>
+    </a>
+
+    <!-- СЕКЦИИ ГЛАВНОЙ -->
+    <a href="{% url 'store:admin_sections' %}"
+       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
+      <div class="text-5xl mb-4">🏠</div>
+      <h2 class="text-xl font-bold group-hover:text-pink-500">
+        Секции главной
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Настройка главной страницы магазина
+      </p>
+    </a>
+
+    <!-- ОТЗЫВЫ -->
+    <a href="{% url 'store:admin_reviews' %}"
+       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
+      <div class="text-5xl mb-4">💬</div>
+      <h2 class="text-xl font-bold group-hover:text-pink-500">
+        Отзывы
+      </h2>
+      <p class="text-gray-500 text-sm mt-1">
+        Одобрение и удаление отзывов пользователей
+      </p>
+    </a>
+
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,4 +1,4 @@
-# apps/cart/cart.py
+# cart/cart.py
 from decimal import Decimal
 from store.models import Product
 

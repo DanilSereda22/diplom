@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth.decorators import login_required,user_passes_test
 from .forms import CheckoutForm
-from .models import Order, OrderItem
+from .models import Order, OrderItem,Product
 from cart.cart import Cart
 from django.contrib.admin.views.decorators import staff_member_required
 
@@ -131,3 +131,91 @@ def order_success_view(request, order_id):
     return render(request, "orders/success.html", {
         "order": order
     })
+
+
+## Админка
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+from django.contrib.auth.decorators import user_passes_test
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.delete()
+    return redirect("orders:admin_orders")
+
+@user_passes_test(is_admin)
+def admin_orders_view(request):
+    orders = Order.objects.all().prefetch_related("items__product").order_by("-created_at")
+
+    return render(request, "orders/admin_orders.html", {
+        "orders": orders
+    })
+
+@user_passes_test(is_admin)
+def admin_update_status(request, order_id, status):
+    order = get_object_or_404(Order, id=order_id)
+
+    if status in dict(Order.STATUS_CHOICES):
+        order.status = status
+        order.save()
+
+    return redirect("orders:admin_orders")
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_edit_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if request.method == "POST":
+        for field in [
+            "first_name", "last_name", "email", "phone",
+            "delivery_method", "delivery_address",
+            "delivery_comment", "status"
+        ]:
+            setattr(order, field, request.POST.get(field))
+        order.save()
+
+    products = Product.objects.filter(available=True)
+
+    return render(request, "orders/admin_edit_order.html", {
+        "order": order,
+        "products": products
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_update_item(request, item_id):
+    item = get_object_or_404(OrderItem, id=item_id)
+    item.quantity = int(request.POST.get("quantity", 1))
+    item.save()
+    return redirect("orders:admin_edit_order", item.order.id)
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_delete_item(request, item_id):
+    if request.method != "POST":
+        return redirect("orders:admin_orders")
+
+    item = get_object_or_404(OrderItem, id=item_id)
+    order_id = item.order_id
+    item.delete()
+
+    return redirect("orders:admin_edit_order", order_id)
+
+
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_add_item(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    product = get_object_or_404(Product, id=request.POST["product_id"])
+
+    OrderItem.objects.create(
+        order=order,
+        product=product,
+        price=product.price,
+        quantity=int(request.POST.get("quantity", 1))
+    )
+    return redirect("orders:admin_edit_order", order.id)

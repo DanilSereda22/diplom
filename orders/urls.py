@@ -11,5 +11,11 @@ urlpatterns = [
     path("courier/", views.courier_orders_view, name="courier_orders"),
     path("courier/complete/<int:order_id>/", views.complete_delivery_view, name="complete_delivery"),
 
-    
+    path("admin/orders/", views.admin_orders_view, name="admin_orders"),
+    path("admin/orders/edit/<int:order_id>/", views.admin_edit_order, name="admin_edit_order"),
+    path("admin/orders/item/update/<int:item_id>/", views.admin_update_item, name="admin_update_item"),
+    path("admin/orders/item/delete/<int:item_id>/", views.admin_delete_item, name="admin_delete_item"),
+    path("admin/orders/item/add/<int:order_id>/", views.admin_add_item, name="admin_add_item"),
+    path("admin/delete/<int:order_id>/", views.admin_delete_order, name="admin_delete_order"),
+
 ]

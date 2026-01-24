@@ -4,7 +4,9 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Category, SubCategory, Product,HomeSection,ShopReview
 from .forms import SearchForm
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
+from django.contrib import messages
+from .forms import ProductForm, CategoryForm, SubCategoryForm, HomeSectionForm
 
 def about_page(request):
     reviews = ShopReview.objects.filter(is_approved=True)
@@ -102,3 +104,194 @@ def terms(request):
 
 def contacts_page(request):
     return render(request, 'pages/contacts.html')
+
+##Админка
+
+
+def staff_required(view_func):
+    return user_passes_test(lambda u: u.is_staff, login_url='users:login')(view_func)
+
+@staff_required
+def admin_dashboard(request):
+    return render(request, "admin/dashboard.html")
+# ТОВАРЫ
+@staff_required
+def admin_products(request):
+    products = Product.objects.all().order_by('-id')
+    return render(request, "store/admin/products.html", {"products": products})
+
+@staff_required
+def admin_add_product(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Товар добавлен")
+            return redirect("store:admin_products")
+    else:
+        form = ProductForm()
+    return render(request, "store/admin/product_form.html", {"form": form, "title": "Добавить товар"})
+
+@staff_required
+def admin_edit_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Товар обновлён")
+            return redirect("store:admin_products")
+    else:
+        form = ProductForm(instance=product)
+    return render(request, "store/admin/product_form.html", {"form": form, "title": "Редактировать товар"})
+
+@staff_required
+def admin_delete_product(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    product.delete()
+    messages.success(request, "Товар удалён")
+    return redirect("store:admin_products")
+
+# КАТЕГОРИИ
+@staff_required
+def admin_categories(request):
+    categories = Category.objects.all().order_by('name')
+    return render(request, "store/admin/categories.html", {"categories": categories})
+
+@staff_required
+def admin_add_category(request):
+    if request.method == "POST":
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Категория добавлена")
+            return redirect("store:admin_categories")
+    else:
+        form = CategoryForm()
+    return render(request, "store/admin/category_form.html", {"form": form, "title": "Добавить категорию"})
+
+@staff_required
+def admin_edit_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == "POST":
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Категория обновлена")
+            return redirect("store:admin_categories")
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, "store/admin/category_form.html", {"form": form, "title": "Редактировать категорию"})
+
+@staff_required
+def admin_delete_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    category.delete()
+    messages.success(request, "Категория удалена")
+    return redirect("store:admin_categories")
+
+
+# ПОДКАТЕГОРИИ
+@staff_required
+def admin_subcategories(request):
+    subcategories = SubCategory.objects.all().order_by('category__name', 'name')
+    return render(request, "store/admin/subcategories.html", {"subcategories": subcategories})
+
+@staff_required
+def admin_add_subcategory(request):
+    if request.method == "POST":
+        form = SubCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Подкатегория добавлена")
+            return redirect("store:admin_subcategories")
+    else:
+        form = SubCategoryForm()
+    return render(request, "store/admin/subcategory_form.html", {"form": form, "title": "Добавить подкатегорию"})
+
+@staff_required
+def admin_edit_subcategory(request, pk):
+    subcategory = get_object_or_404(SubCategory, pk=pk)
+    if request.method == "POST":
+        form = SubCategoryForm(request.POST, instance=subcategory)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Подкатегория обновлена")
+            return redirect("store:admin_subcategories")
+    else:
+        form = SubCategoryForm(instance=subcategory)
+    return render(request, "store/admin/subcategory_form.html", {"form": form, "title": "Редактировать подкатегорию"})
+
+@staff_required
+def admin_delete_subcategory(request, pk):
+    subcategory = get_object_or_404(SubCategory, pk=pk)
+    subcategory.delete()
+    messages.success(request, "Подкатегория удалена")
+    return redirect("store:admin_subcategories")
+
+# СЕКЦИИ ГЛАВНОЙ
+
+@staff_required
+def admin_sections(request):
+    sections = HomeSection.objects.all().order_by('order')
+    return render(request, "store/admin/sections.html", {"sections": sections})
+
+
+@staff_required
+def admin_add_section(request):
+    if request.method == "POST":
+        form = HomeSectionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Секция добавлена")
+            return redirect("store:admin_sections")
+    else:
+        form = HomeSectionForm()
+    return render(request, "store/admin/section_form.html", {"form": form, "title": "Добавить секцию"})
+
+
+@staff_required
+def admin_edit_section(request, pk):
+    section = get_object_or_404(HomeSection, pk=pk)
+    if request.method == "POST":
+        form = HomeSectionForm(request.POST, instance=section)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Секция обновлена")
+            return redirect("store:admin_sections")
+    else:
+        form = HomeSectionForm(instance=section)
+    return render(request, "store/admin/section_form.html", {"form": form, "title": "Редактировать секцию"})
+
+
+@staff_required
+def admin_delete_section(request, pk):
+    section = get_object_or_404(HomeSection, pk=pk)
+    section.delete()
+    messages.success(request, "Секция удалена")
+    return redirect("store:admin_sections")
+
+# ОТЗЫВЫ
+@staff_required
+def admin_reviews(request):
+    reviews = ShopReview.objects.all().order_by('-created_at')
+    return render(request, "store/admin/reviews.html", {"reviews": reviews})
+
+
+@staff_required
+def admin_approve_review(request, pk):
+    review = get_object_or_404(ShopReview, pk=pk)
+    review.is_approved = True
+    review.save()
+    messages.success(request, "Отзыв одобрен")
+    return redirect("store:admin_reviews")
+
+
+@staff_required
+def admin_delete_review(request, pk):
+    review = get_object_or_404(ShopReview, pk=pk)
+    review.delete()
+    messages.success(request, "Отзыв удалён")
+    return redirect("store:admin_reviews")
+
+

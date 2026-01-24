@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-black">Подкатегории</h1>
+    <a href="{% url 'store:admin_add_subcategory' %}" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">
+      Добавить подкатегорию
+    </a>
+  </div>
+
+  <ul class="bg-white border rounded-3xl p-6 space-y-2">
+    {% for subcategory in subcategories %}
+      <li class="flex justify-between items-center border-b p-2">
+        <span>{{ subcategory.category.name }} → {{ subcategory.name }}</span>
+        <div class="flex gap-2">
+          <a href="{% url 'store:admin_edit_subcategory' subcategory.id %}" class="px-4 py-2 rounded-xl bg-blue-100 text-blue-700 text-sm font-bold hover:bg-blue-200">Редактировать</a>
+          <a href="{% url 'store:admin_delete_subcategory' subcategory.id %}" onclick="return confirm('Удалить подкатегорию?')" class="px-4 py-2 rounded-xl bg-red-100 text-red-700 text-sm font-bold hover:bg-red-200">Удалить</a>
+        </div>
+      </li>
+    {% empty %}
+      <li class="text-center text-gray-400 p-2">Подкатегорий нет</li>
+    {% endfor %}
+  </ul>
+
+</div>
+
+{% endblock %}

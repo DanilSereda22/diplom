@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <h1 class="text-3xl font-black">Отзывы о магазине</h1>
+
+  <div class="bg-white border rounded-3xl p-6 space-y-4">
+    {% for review in reviews %}
+      <div class="border-b p-2 flex justify-between items-center">
+        <div>
+          <p><b>{{ review.user.username }}</b> — {{ review.created_at|date:"d.m.Y H:i" }}</p>
+          <p>{{ review.text }}</p>
+          <p class="text-sm text-gray-500">Одобрен: {% if review.is_approved %}Да{% else %}Нет{% endif %}</p>
+        </div>
+        <div class="flex gap-2">
+          {% if not review.is_approved %}
+            <a href="{% url 'store:admin_approve_review' review.id %}" class="px-2 py-1 bg-green-100 text-green-700 rounded-lg">Одобрить</a>
+          {% endif %}
+          <a href="{% url 'store:admin_delete_review' review.id %}" onclick="return confirm('Удалить отзыв?')" class="px-4 py-2 rounded-xl bg-red-100 text-red-700 text-sm font-bold hover:bg-red-200">Удалить</a>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-center text-gray-400 py-4">Отзывы отсутствуют</p>
+    {% endfor %}
+  </div>
+
+</div>
+
+{% endblock %}

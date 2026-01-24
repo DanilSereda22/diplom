@@ -42,6 +42,10 @@
           {% if user.is_staff %}
             <a href="{% url 'orders:courier_orders' %}" class="font-semibold hover:text-pink-500 transition">Доставка</a>
           {% endif %}
+          {% if user.is_authenticated and user.is_staff %}
+          <a href="{% url 'users:admin_dashboard' %}" class="font-semibold hover:text-pink-500 transition"> Админ </a>
+          {% endif %}
+
 
           <div class="relative group hidden sm:block">
             <a href="{% url 'users:profile' %}"

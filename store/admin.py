@@ -1,4 +1,4 @@
-# apps/store/admin.py
+# store/admin.py
 from django.contrib import admin
 from .models import Category, SubCategory, Product,HomeSection,ShopReview
 

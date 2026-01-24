@@ -1,4 +1,4 @@
-# apps/cart/context_processors.py
+# cart/context_processors.py
 from .cart import Cart
 
 def cart_counter(request):

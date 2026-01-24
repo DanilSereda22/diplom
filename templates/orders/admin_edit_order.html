@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto space-y-8">
+
+  <h1 class="text-3xl font-black">
+    Редактирование заказа #{{ order.id }}
+  </h1>
+
+  <!-- ORDER FORM -->
+  <form method="post" class="bg-white border rounded-3xl p-6 space-y-6">
+    {% csrf_token %}
+
+    <div class="grid md:grid-cols-2 gap-6">
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Имя</label>
+        <input name="first_name" value="{{ order.first_name }}" class="input">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Фамилия</label>
+        <input name="last_name" value="{{ order.last_name }}" class="input">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Email</label>
+        <input name="email" value="{{ order.email }}" class="input">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Телефон</label>
+        <input name="phone" value="{{ order.phone }}" class="input">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Способ доставки</label>
+        <select name="delivery_method" class="input">
+          {% for key,label in order.DELIVERY_CHOICES %}
+            <option value="{{ key }}" {% if order.delivery_method == key %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold mb-1">Статус</label>
+        <select name="status" class="input">
+          {% for key,label in order.STATUS_CHOICES %}
+            <option value="{{ key }}" {% if order.status == key %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-bold mb-1">Адрес доставки</label>
+        <input name="delivery_address" value="{{ order.delivery_address }}" class="input">
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-bold mb-1">Комментарий</label>
+        <textarea name="delivery_comment" class="input">{{ order.delivery_comment }}</textarea>
+      </div>
+
+    </div>
+
+    <button class="px-6 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-pink-500">
+      Сохранить заказ
+    </button>
+  </form>
+
+  <!-- ITEMS -->
+  <div class="bg-white border rounded-3xl p-6 space-y-4">
+    <h2 class="text-xl font-bold">Товары в заказе</h2>
+
+    {% for item in order.items.all %}
+    <div class="flex items-center gap-3 border p-3 rounded-xl">
+
+      <!-- INFO -->
+      <div class="flex-1">
+        <b>{{ item.product.name }}</b>
+        <div class="text-sm text-gray-400">
+          {{ item.price }} ₽
+        </div>
+      </div>
+
+      <!-- UPDATE QUANTITY -->
+      <form method="post"
+            action="{% url 'orders:admin_update_item' item.id %}"
+            class="flex gap-2 items-center">
+        {% csrf_token %}
+        <input type="number"
+               name="quantity"
+               value="{{ item.quantity }}"
+               min="1"
+               class="w-20 input">
+
+        <button class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-bold">
+          Обновить
+        </button>
+      </form>
+
+      <!-- DELETE ITEM -->
+      <form method="post"
+            action="{% url 'orders:admin_delete_item' item.id %}"
+            onsubmit="return confirm('Удалить товар?')">
+        {% csrf_token %}
+        <button class="px-3 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-bold">
+          ✕
+        </button>
+      </form>
+
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ADD PRODUCT -->
+  <form method="post"
+        action="{% url 'orders:admin_add_item' order.id %}"
+        class="bg-white border rounded-3xl p-6 space-y-4">
+    {% csrf_token %}
+
+    <h2 class="text-xl font-bold">Добавить товар</h2>
+
+    <div class="flex gap-4">
+      <select name="product_id" class="input flex-1">
+        {% for product in products %}
+          <option value="{{ product.id }}">
+            {{ product.name }} ({{ product.price }} ₽)
+          </option>
+        {% endfor %}
+      </select>
+
+      <input type="number" name="quantity" value="1" min="1" class="w-24 input">
+
+      <button class="px-5 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700">
+        Добавить
+      </button>
+    </div>
+  </form>
+
+</div>
+
+<style>
+.input{
+  width:100%;
+  padding:.5rem;
+  border-radius:.75rem;
+  border:1px solid #e5e7eb;
+  background:#f9fafb;
+}
+</style>
+
+{% endblock %}

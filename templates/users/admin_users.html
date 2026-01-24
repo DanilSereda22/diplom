@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="max-w-6xl mx-auto space-y-6">
+
+  <h1 class="text-3xl font-black">Пользователи</h1>
+
+  <div class="bg-white border rounded-3xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="p-3 text-left">Пользователь</th>
+          <th class="p-3">Email</th>
+          <th class="p-3">Роль</th>
+          <th class="p-3"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for u in users %}
+        <tr class="border-t">
+          <td class="p-3">
+            <b>{{ u.username }}</b><br>
+            <span class="text-gray-500">{{ u.get_full_name }}</span>
+          </td>
+
+          <td class="p-3 text-center">
+            {{ u.email }}
+          </td>
+
+          <td class="p-3 text-center">
+            {% if u.is_superuser %}
+              Админ
+            {% elif u.is_staff %}
+              Курьер
+            {% else %}
+              Пользователь
+            {% endif %}
+          </td>
+
+          <td class="p-3 text-right space-x-2">
+            <a href="{% url 'users:admin_edit_user' u.id %}"
+               class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg font-bold">
+              Редактировать
+            </a>
+
+            <form method="post"
+                  action="{% url 'users:admin_delete_user' u.id %}"
+                  class="inline"
+                  onsubmit="return confirm('Удалить пользователя?')">
+              {% csrf_token %}
+              <button
+                class="px-3 py-1 bg-red-100 text-red-700 rounded-lg font-bold">
+                Удалить
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+{% endblock %}
