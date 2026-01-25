@@ -16,30 +16,22 @@
         <h3 class="font-bold text-lg">Контактные данные</h3>
 
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
-            Имя
-          </label>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Имя</label>
           {{ form.first_name }}
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
-            Фамилия
-          </label>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Фамилия</label>
           {{ form.last_name }}
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
-            Номер телефона
-          </label>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Номер телефона</label>
           {{ form.phone }}
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
-            Электронная почта
-          </label>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Электронная почта</label>
           {{ form.email }}
         </div>
 
@@ -50,15 +42,11 @@
         <!-- ДОСТАВКА -->
         <div id="delivery-fields" class="hidden space-y-4">
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
-              Адрес доставки
-            </label>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Адрес доставки</label>
             {{ form.delivery_address }}
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
-              Комментарий к доставке
-            </label>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Комментарий к доставке</label>
             {{ form.delivery_comment }}
           </div>
         </div>
@@ -72,15 +60,29 @@
           <input type="number" min="0" step="1" name="use_bonus" id="use-bonus"
                  class="w-full p-2 border rounded-lg" placeholder="Списать бонусы">
         </div>
+        {% else %}
+        <div class="p-4 bg-yellow-50 text-yellow-700 rounded-xl text-sm">
+          Для оформления заказа и получения бонусов необходимо 
+          <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" class="underline font-bold">
+            войти или зарегистрироваться
+          </a>.
+        </div>
         {% endif %}
 
       </div>
 
+      {% if user.is_authenticated %}
       <button type="submit"
         class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg
                hover:bg-pink-500 shadow-xl transition-all">
         Подтвердить заказ
       </button>
+      {% else %}
+      <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" 
+         class="w-full block text-center bg-gray-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-pink-500 shadow-xl transition-all">
+        Войти или зарегистрироваться
+      </a>
+      {% endif %}
     </form>
 
     <!-- КОРЗИНА -->
@@ -101,14 +103,14 @@
               <p class="text-gray-400">Кол-во: {{ item.quantity }}</p>
             </div>
           </div>
-          <span class="font-black text-gray-900">{{ item.total_price }}&nbsp;₽</span>
+          <span class="font-black text-gray-900">{{ item.total_price }} ₽</span>
         </li>
         {% endfor %}
       </ul>
 
       <div class="border-t pt-4 flex justify-between">
         <span class="text-gray-500 font-bold">Итого:</span>
-        <span class="text-2xl font-black" id="total-price">{{ cart.get_total_price }}&nbsp;₽</span>
+        <span class="text-2xl font-black" id="total-price">{{ cart.get_total_price }} ₽</span>
       </div>
     </div>
 
@@ -118,16 +120,13 @@
 <!-- JS -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  // --- Переключение полей доставки ---
+  // Переключение полей доставки
   const select = document.querySelector('select[name="delivery_method"]');
   const fields = document.getElementById("delivery-fields");
-  function toggleFields() {
-    fields.classList.toggle("hidden", select.value !== "delivery");
-  }
-  select.addEventListener("change", toggleFields);
-  toggleFields();
+  function toggleFields() { fields.classList.toggle("hidden", select.value !== "delivery"); }
+  select.addEventListener("change", toggleFields); toggleFields();
 
-  // --- Маска телефона ---
+  // Маска телефона
   const input = document.getElementById("phone");
   if (input) {
     input.addEventListener("input", e => {
@@ -137,7 +136,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // --- Пересчет суммы при бонусах ---
+  // Пересчет суммы при бонусах
   const bonusInput = document.getElementById("use-bonus");
   const totalElem = document.getElementById("total-price");
   const originalTotal = parseFloat(totalElem.textContent.replace(/\D/g,'')) || 0;
@@ -145,17 +144,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if(bonusInput){
     bonusInput.addEventListener("input", () => {
       let bonus = parseFloat(bonusInput.value) || 0;
-
-      // Пользователь не может списать больше своих бонусов
       const maxBonus = {{ user.bonus_points|default:0 }};
-      if(bonus > maxBonus){
-        bonus = maxBonus;
-        bonusInput.value = bonus;
-      }
-
-      // Новый итог после списания бонусов
-      let newTotal = originalTotal - bonus;
-      if(newTotal < 0) newTotal = 0;
+      if(bonus > maxBonus){ bonus = maxBonus; bonusInput.value = bonus; }
+      let newTotal = originalTotal - bonus; if(newTotal < 0) newTotal = 0;
       totalElem.textContent = newTotal.toFixed(0) + " ₽";
     });
   }

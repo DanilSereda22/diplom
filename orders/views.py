@@ -1,8 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db import transaction
-from django.contrib.auth.decorators import login_required, user_passes_test
 from decimal import Decimal
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 
 from .models import Order, OrderItem
@@ -25,22 +24,20 @@ def is_admin(user):
 # ----------------------
 # ОФОРМЛЕНИЕ ЗАКАЗА
 # ----------------------
-@login_required
+@login_required(login_url='users:login')  # редирект на страницу логина
 def checkout_view(request):
     cart = Cart(request)
     if cart.is_empty():
         messages.info(request, "Ваша корзина пуста.")
         return redirect("store:product_list")
 
-    initial = {}
-    if request.user.is_authenticated:
-        initial = {
-            "first_name": request.user.first_name,
-            "last_name": request.user.last_name,
-            "email": request.user.email,
-            "phone": getattr(request.user, "phone", ""),
-            "delivery_address": getattr(request.user, "address", ""),
-        }
+    initial = {
+        "first_name": getattr(request.user, "first_name", ""),
+        "last_name": getattr(request.user, "last_name", ""),
+        "email": getattr(request.user, "email", ""),
+        "phone": getattr(request.user, "phone", ""),
+        "delivery_address": getattr(request.user, "address", ""),
+    }
 
     if request.method == "POST":
         form = CheckoutForm(request.POST, initial=initial)
@@ -82,12 +79,11 @@ def checkout_view(request):
 # ----------------------
 # ОПЛАТА ЗАКАЗА
 # ----------------------
-@login_required
+@login_required(login_url='users:login')
 def payment(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
     if request.method == "POST":
-        # Проверка наличия товаров на складе
         for item in order.items.select_related("product"):
             product = item.product
             if item.quantity > product.stock:
@@ -98,11 +94,10 @@ def payment(request, order_id):
                 product.available = False
             product.save()
 
-        # Меняем статус заказа на оплачено
         order.status = "paid"
         order.save()
 
-        # Начисляем 1% бонусов от суммы после списания
+        # Начисляем 1% бонусов
         bonus = order.total_price - order.bonus_used
         request.user.bonus_points += bonus * Decimal("0.01")
         request.user.save()
@@ -119,22 +114,22 @@ def payment(request, order_id):
 # ----------------------
 # СТРАНИЦА УСПЕШНОГО ЗАКАЗА
 # ----------------------
-@login_required
+@login_required(login_url='users:login')
 def order_success_view(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     bonus_added = getattr(request.session, "bonus_added", None)
     if bonus_added is None:
-        # Рассчитываем бонус, если вдруг не передано через сессию
-        bonus_added = order.total_price * Decimal("0.01")
+        bonus_added = (order.total_price - order.bonus_used) * Decimal("0.01")
     return render(request, "orders/success.html", {
         "order": order,
         "bonus_added": bonus_added
     })
 
+
 # ----------------------
 # КУРЬЕР
 # ----------------------
-@login_required
+@login_required(login_url='users:login')
 @user_passes_test(is_courier)
 def courier_orders_view(request):
     orders = Order.objects.filter(delivery_method="delivery", status="paid").order_by("-created_at")
@@ -164,13 +159,10 @@ def admin_update_status(request, order_id, status):
     if status in dict(Order.STATUS_CHOICES):
         order.status = status
         order.save()
-
-        # Начисление бонусов, если оплачено
         if status == "paid" and order.user:
             bonus = order.total_price - order.bonus_used
             order.user.bonus_points += bonus * Decimal("0.01")
             order.user.save()
-
     return redirect("orders:admin_orders")
 
 
@@ -185,13 +177,11 @@ def admin_delete_order(request, order_id):
 def admin_edit_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     products = Product.objects.filter(available=True)
-
     if request.method == "POST":
         for field in ["first_name", "last_name", "email", "phone",
                       "delivery_method", "delivery_address", "delivery_comment", "status"]:
             setattr(order, field, request.POST.get(field))
         order.save()
-
     return render(request, "orders/admin_edit_order.html", {"order": order, "products": products})
 
 
@@ -216,6 +206,5 @@ def admin_add_item(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     product = get_object_or_404(Product, id=request.POST["product_id"])
     quantity = int(request.POST.get("quantity", 1))
-
     OrderItem.objects.create(order=order, product=product, price=product.price, quantity=quantity)
     return redirect("orders:admin_edit_order", order.id)
