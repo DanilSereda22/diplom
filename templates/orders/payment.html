@@ -6,94 +6,57 @@
     Оплата заказа №{{ order.id }}
   </h2>
 
+  <p class="text-gray-600 mb-4">
+    Итого к оплате: {{ order.final_total_price|floatformat:0 }} ₽
+    {% if order.bonus_used %}
+      (списано бонусов: {{ order.bonus_used|floatformat:0 }})
+    {% endif %}
+  </p>
+
   <form method="post" id="pay-form" class="space-y-4">
     {% csrf_token %}
-
     <div>
       <label class="text-xs font-bold text-gray-400 uppercase">Номер карты</label>
-      <input id="card" required
-        class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
-        placeholder="0000 0000 0000 0000">
+      <input id="card" required class="w-full px-4 py-3 rounded-xl border bg-gray-50" placeholder="0000 0000 0000 0000">
     </div>
-
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="text-xs font-bold text-gray-400 uppercase">Месяц / Год</label>
-        <input id="date" required
-          class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
-          placeholder="MM/YY">
+        <input id="date" required class="w-full px-4 py-3 rounded-xl border bg-gray-50" placeholder="MM/YY">
       </div>
       <div>
         <label class="text-xs font-bold text-gray-400 uppercase">CVC</label>
-        <input id="cvc" required
-          class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
-          placeholder="123">
+        <input id="cvc" required class="w-full px-4 py-3 rounded-xl border bg-gray-50" placeholder="123">
       </div>
     </div>
-
     <div>
       <label class="text-xs font-bold text-gray-400 uppercase">Имя и фамилия</label>
-      <input id="name" required
-        class="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:ring-4 focus:ring-pink-100 outline-none"
-        placeholder="IVAN IVANOV">
+      <input id="name" required class="w-full px-4 py-3 rounded-xl border bg-gray-50" placeholder="IVAN IVANOV">
     </div>
 
-    <button
-      class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black
-             hover:bg-pink-500 shadow-xl transition">
-      Оплатить {{ order.total_price }} ₽
+    <button class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black hover:bg-pink-500 shadow-xl transition">
+      Оплатить {{ order.final_total_price|floatformat:0 }} ₽
     </button>
   </form>
-
-  <p class="text-xs text-gray-400 mt-4 text-center">
-    Демонстрационная страница. Реальная оплата не производится.
-  </p>
 </div>
 
 <script>
 const f = id => document.getElementById(id);
-
-/* CARD */
-f("card").oninput = e =>
-  e.target.value = e.target.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
-
-/* DATE MM/YY */
+f("card").oninput = e => e.target.value = e.target.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
 f("date").oninput = e => {
-  let v = e.target.value.replace(/\D/g,'').slice(0,4); // только цифры, максимум 4
+  let v = e.target.value.replace(/\D/g,'').slice(0,4);
   let month = v.slice(0,2);
   let year = v.slice(2,4);
-
-  // Ограничение месяца 01-12
-  if(month.length === 2){
-    let m = parseInt(month);
-    if(m < 1) month = "01";
-    else if(m > 12) month = "12";
-  }
-
-  // Ограничение года 26-99
-  if(year.length === 2){
-    let y = parseInt(year);
-    if(y < 26) year = "26";
-    else if(y > 99) year = "99";
-  }
-
+  if(month.length===2){month=Math.max(1,Math.min(12,parseInt(month))).toString().padStart(2,'0');}
+  if(year.length===2){year=Math.max(26,Math.min(99,parseInt(year))).toString();}
   e.target.value = month + (year ? '/' + year : '');
 };
-
-
-/* CVC */
-f("cvc").oninput = e =>
-  e.target.value = e.target.value.replace(/\D/g,'').slice(0,3);
-
-/* NAME (LATIN ONLY) */
-f("name").oninput = e =>
-  e.target.value = e.target.value.replace(/[^A-Z\s]/gi,'').toUpperCase();
-
-/* FINAL VALIDATION */
+f("cvc").oninput = e => e.target.value = e.target.value.replace(/\D/g,'').slice(0,3);
+f("name").oninput = e => e.target.value = e.target.value.replace(/[^A-Z\s]/gi,'').toUpperCase();
 document.getElementById("pay-form").onsubmit = () =>
-  f("card").value.replace(/\s/g,'').length === 16 &&
-  f("cvc").value.length === 3 &&
-  f("date").value.length === 5 &&
+  f("card").value.replace(/\s/g,'').length===16 &&
+  f("cvc").value.length===3 &&
+  f("date").value.length===5 &&
   /^[A-Z]+ [A-Z]+$/.test(f("name").value);
 </script>
 

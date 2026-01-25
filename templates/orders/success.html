@@ -8,14 +8,24 @@
         Оплата прошла успешно
     </h1>
 
-    <p class="text-gray-500 mb-6">
+    <p class="text-gray-500 mb-4">
         Заказ №{{ order.id }} был успешно оплачен.
     </p>
+
+    {% if bonus_added %}
+    <p class="text-green-600 font-bold mb-4">
+        Вам начислено {{ bonus_added|floatformat:0 }} бонусов за этот заказ!
+    </p>
+    {% endif %}
 
     <div class="bg-gray-50 rounded-2xl p-4 text-sm text-gray-600 mb-6">
         <p><strong>Имя:</strong> {{ order.first_name }} {{ order.last_name }}</p>
         <p><strong>Email:</strong> {{ order.email }}</p>
         <p><strong>Статус:</strong> Оплачен</p>
+        <p><strong>Итого к оплате:</strong> {{ order.total_price|floatformat:0 }} ₽</p>
+        {% if order.bonus_used %}
+        <p><strong>Бонусы списаны:</strong> {{ order.bonus_used|floatformat:0 }} ₽</p>
+        {% endif %}
     </div>
 
     <a href="{% url 'store:product_list' %}"

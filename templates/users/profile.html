@@ -35,6 +35,9 @@
       <input name="address" value="{{ user.address }}"
              placeholder="Адрес доставки" class="input">
 
+      <h3 class="font-bold text-lg mt-4">Бонусы</h3>
+      <p>Ваши бонусы: <b>{{ user.bonus_points|floatformat:0 }} ₽</b></p>
+
       <button class="w-full bg-gray-900 text-white py-2 rounded-xl font-bold hover:bg-pink-500">
         Сохранить
       </button>
@@ -52,11 +55,8 @@
             <div class="flex gap-2 items-center">
               <b>Заказ #{{ forloop.counter }}</b>
               <span class="text-xs px-2 py-1 rounded-full
-                {% if order.status == 'paid' %}
-                  bg-green-100 text-green-600
-                {% else %}
-                  bg-yellow-100 text-yellow-600
-                {% endif %}">
+                {% if order.status == 'paid' %} bg-green-100 text-green-600
+                {% else %} bg-yellow-100 text-yellow-600 {% endif %}">
                 {{ order.get_status_display }}
               </span>
             </div>
@@ -96,7 +96,8 @@ document.getElementById("phone")?.addEventListener("input", e => {
   let v = e.target.value.replace(/\D/g,'').slice(1);
   e.target.value = "+7 ("+v.slice(0,3)+(v[3]?") ":"")+
                    v.slice(3,6)+(v[6]?"-":"")+
-                   v.slice(6,8)+(v[8]?"-":"")+v.slice(8,10);
+                   v.slice(6,8)+(v[8]?"-":"")+
+                   v.slice(8,10);
 });
 </script>
 

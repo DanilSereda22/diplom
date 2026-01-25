@@ -27,11 +27,15 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            # Начисляем бонусы за регистрацию
+            user.bonus_points += 50
+            user.save()
             login(request, user)
             return redirect("home")
     else:
         form = RegisterForm()
     return render(request, "users/register.html", {"form": form})
+
 
 @login_required
 def profile_view(request):
