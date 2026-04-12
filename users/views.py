@@ -47,14 +47,19 @@ def profile_view(request):
         user.phone = request.POST.get("phone", user.phone)
         user.address = request.POST.get("address", user.address)
 
-        # загрузка аватара
         if request.FILES.get("avatar"):
             user.avatar = request.FILES["avatar"]
 
         user.save()
         return redirect("users:profile")
 
-    return render(request, "users/profile.html", {"user": user})
+    # 👉 ВАЖНО: оптимизация
+    orders = user.orders.prefetch_related("items__product").order_by("-created_at")
+
+    return render(request, "users/profile.html", {
+        "user": user,
+        "orders": orders
+    })
 
 ## Админка
 
