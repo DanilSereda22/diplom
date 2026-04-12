@@ -11,6 +11,7 @@ urlpatterns = [
     path("category/<slug:slug>/", views.category_view, name="category_detail"),
     path("subcategory/<slug:slug>/", views.subcategory_view, name="subcategory"),
     path("product/<slug:slug>/", views.product_detail, name="product_detail"),
+    path("review/<int:review_id>/react/", views.toggle_reaction, name="review_react"),
     
     path('contacts/', views.contacts_page, name='contacts'),
     path("faq/", views.faq, name="faq"),

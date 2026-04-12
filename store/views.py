@@ -1,26 +1,52 @@
 # apps/store/views.py
 from django.shortcuts import render, get_object_or_404,redirect
 from django.core.paginator import Paginator
-from django.db.models import Q
-from .models import Category, SubCategory, Product,HomeSection,ShopReview
+from django.db.models import Q,Count
+from .models import Category, SubCategory, Product,HomeSection,ShopReview,ReviewReaction
 from .forms import SearchForm
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib import messages
 from .forms import ProductForm, CategoryForm, SubCategoryForm, HomeSectionForm
+from django.http import JsonResponse
 
 def about_page(request):
-    reviews = ShopReview.objects.filter(is_approved=True)
-    
+    reviews = ShopReview.objects.filter(is_approved=True).annotate(
+        likes_count=Count('reactions', filter=Q(reactions__value=1)),
+        dislikes_count=Count('reactions', filter=Q(reactions__value=-1)),
+    ).select_related('user')
+
+    # 👉 Добавляем реакцию пользователя
+    if request.user.is_authenticated:
+        user_reactions = ReviewReaction.objects.filter(
+            user=request.user,
+            review__in=reviews
+        )
+
+        reaction_map = {r.review_id: r.value for r in user_reactions}
+
+        for review in reviews:
+            review.user_reaction = reaction_map.get(review.id, 0)
+    else:
+        for review in reviews:
+            review.user_reaction = 0
+
+    # POST (отзыв)
     if request.method == 'POST':
         if request.user.is_authenticated:
             text = request.POST.get('text')
             if text:
-                ShopReview.objects.create(user=request.user, text=text)
+                ShopReview.objects.create(
+                    user=request.user,
+                    text=text,
+                    is_approved=False
+                )
                 return redirect('store:about')
         else:
-            return redirect('login') 
+            return redirect('users:login')
 
-    return render(request, 'pages/about.html', {'reviews': reviews})
+    return render(request, 'pages/about.html', {
+        'reviews': reviews
+    })
 
 def home(request):
     sections = HomeSection.objects.filter(is_active=True).prefetch_related(
@@ -278,3 +304,35 @@ def admin_delete_review(request, pk):
     return redirect("store:admin_reviews")
 
 
+@login_required
+def toggle_reaction(request, review_id):
+    review = get_object_or_404(ShopReview, id=review_id)
+    value = int(request.POST.get("value"))
+
+    reaction, created = ReviewReaction.objects.get_or_create(
+        user=request.user,
+        review=review,
+        defaults={"value": value}
+    )
+
+    if not created:
+        if reaction.value == value:
+            reaction.delete()
+        else:
+            reaction.value = value
+            reaction.save()
+
+    likes = review.reactions.filter(value=1).count()
+    dislikes = review.reactions.filter(value=-1).count()
+
+    user_reaction = 0
+    if request.user.is_authenticated:
+        r = ReviewReaction.objects.filter(user=request.user, review=review).first()
+        if r:
+            user_reaction = r.value
+
+    return JsonResponse({
+        "likes": likes,
+        "dislikes": dislikes,
+        "user_reaction": user_reaction
+    })

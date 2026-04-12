@@ -3,30 +3,30 @@
 
 <div class="max-w-4xl mx-auto py-10 px-4">
     <section class="text-center mb-20">
-        <div class="inline-block p-4 bg-pink-50 rounded-3xl mb-6 shadow-sm">
+        <div class="inline-block p-4 bg-pink-50 rounded-3xl mb-6 shadow-sm transform hover:scale-105 transition duration-300">
             <span class="text-5xl">🏪</span>
         </div>
-        <h1 class="text-5xl font-black text-gray-800 mb-6 italic">О нашем магазине</h1>
-        <p class="text-xl text-gray-500 leading-relaxed">
+        <h1 class="text-5xl font-black text-gray-800 mb-6 italic tracking-tight">О нашем магазине</h1>
+        <p class="text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto">
             Добро пожаловать в мир самых вкусных сладостей! Мы собираем уникальные конфеты и десерты со всего мира, 
             чтобы каждый ваш день был чуточку ярче. Наша миссия — дарить радость в каждой коробочке.
         </p>
     </section>
 
     <div class="grid md:grid-cols-3 gap-8 mb-20 text-center">
-        <div class="p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm">
-            <div class="text-3xl mb-3">🚀</div>
-            <h3 class="font-bold text-gray-800 mb-2">Быстрая доставка</h3>
+        <div class="p-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div class="text-4xl mb-4">🚀</div>
+            <h3 class="font-bold text-gray-800 mb-2 text-lg">Быстрая доставка</h3>
             <p class="text-sm text-gray-400">Привезем заказ в день оформления</p>
         </div>
-        <div class="p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm">
-            <div class="text-3xl mb-3">🌿</div>
-            <h3 class="font-bold text-gray-800 mb-2">Натурально</h3>
+        <div class="p-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div class="text-4xl mb-4">🌿</div>
+            <h3 class="font-bold text-gray-800 mb-2 text-lg">Натурально</h3>
             <p class="text-sm text-gray-400">Только проверенные ингредиенты</p>
         </div>
-        <div class="p-6 bg-white rounded-[2rem] border border-gray-100 shadow-sm">
-            <div class="text-3xl mb-3">🎁</div>
-            <h3 class="font-bold text-gray-800 mb-2">Подарки</h3>
+        <div class="p-8 bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div class="text-4xl mb-4">🎁</div>
+            <h3 class="font-bold text-gray-800 mb-2 text-lg">Подарки</h3>
             <p class="text-sm text-gray-400">Бонусы к каждому заказу</p>
         </div>
     </div>
@@ -36,51 +36,155 @@
 
         <div class="space-y-6 mb-12">
             {% for review in reviews %}
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-pink-50 relative">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center text-pink-500 font-bold">
-                        {{ review.user.username|slice:":1"|upper }}
+            <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-pink-50 relative group">
+                    <div class="flex items-center gap-4 mb-4">
+
+                    <!-- АВАТАР -->
+                    <div class="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
+                        {% if review.user.avatar %}
+                        <img src="{{ review.user.avatar.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-pink-600 font-bold">
+                            {{ review.user.username|slice:":1"|upper }}
+                        </div>
+                        {% endif %}
                     </div>
+
                     <div>
                         <p class="font-bold text-gray-800">{{ review.user.username }}</p>
-                        <p class="text-[10px] text-gray-400 uppercase tracking-widest">{{ review.created_at|date:"d E Y" }}</p>
+                        <p class="text-xs text-gray-400">
+                        {{ review.created_at|date:"d.m.Y" }}
+                        </p>
                     </div>
+
+                    </div>
+                <p class="text-gray-600 leading-relaxed text-lg italic mb-6">«{{ review.text }}»</p>
+
+                <div class="pt-4 border-t border-gray-50 flex gap-4 items-center">
+                    {% if user.is_authenticated %}
+                        <button onclick="react(this.dataset.id, this.dataset.val)" 
+                                data-id="{{ review.id }}" 
+                                data-val="1"
+                                id="like-btn-{{ review.id }}"
+                                class="group flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200
+                                {% if review.user_reaction == 1 %}
+                                    bg-green-100 border-green-200 text-green-800
+                                {% else %}
+                                    bg-gray-50 border-gray-100 hover:bg-green-50 hover:border-green-200
+                                {% endif %}">
+                                
+                            <span class="text-lg group-hover:scale-120 transition-transform">👍</span> 
+                            <span id="likes-{{ review.id }}" class="font-bold">
+                                {{ review.likes_count }}
+                            </span>
+                        </button>
+                        <button onclick="react(this.dataset.id, this.dataset.val)" 
+                                data-id="{{ review.id }}" 
+                                data-val="-1"
+                                id="dislike-btn-{{ review.id }}"
+                                class="group flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200
+                                {% if review.user_reaction == -1 %}
+                                    bg-red-100 border-red-200 text-red-800
+                                {% else %}
+                                    bg-gray-50 border-gray-100 hover:bg-red-50 hover:border-red-200
+                                {% endif %}">
+                                
+                            <span class="text-lg group-hover:scale-120 transition-transform">👎</span> 
+                            <span id="dislikes-{{ review.id }}" class="font-bold">
+                                {{ review.dislikes_count }}
+                            </span>
+                        </button>
+                    {% else %}
+                        <div class="flex gap-6 px-2 py-1 text-gray-400 text-sm italic">
+                            <span title="Войдите, чтобы поставить лайк">👍 {{ review.likes_count }}</span>
+                            <span title="Войдите, чтобы поставить дизлайк">👎 {{ review.dislikes_count }}</span>
+                        </div>
+                    {% endif %}
                 </div>
-                <p class="text-gray-600 leading-relaxed italic">{{ review.text }}</p>
-                <span class="absolute top-6 right-8 text-4xl text-pink-100 font-serif"></span>
             </div>
             {% empty %}
-            <p class="text-center text-gray-400 italic py-10">Будьте первым, кто оставит отзыв! ✨</p>
+            <div class="text-center py-12 bg-white rounded-[2rem] border border-dashed border-pink-200">
+                <span class="text-4xl mb-4 block">✨</span>
+                <p class="text-gray-500 italic text-lg">Будьте первым, кто оставит отзыв!</p>
+            </div>
             {% endfor %}
         </div>
 
-        <div class="bg-white p-8 rounded-[2.5rem] shadow-xl border border-pink-100">
+        <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl shadow-pink-100/50 border border-pink-100 relative overflow-hidden">
             {% if user.is_authenticated %}
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Оставить отзыв</h3>
-                <form method="POST">
+                <h3 class="text-2xl font-black text-gray-800 mb-6">Оставить отзыв</h3>
+                <form method="POST" class="relative z-10">
                     {% csrf_token %}
                     <textarea name="text" rows="4" required
-                              class="w-full p-4 rounded-2xl bg-gray-50 border border-gray-100 focus:ring-4 focus:ring-pink-100 focus:bg-white outline-none transition mb-4 text-gray-600"
+                              class="w-full p-5 rounded-2xl bg-gray-50 border border-gray-200 focus:ring-4 focus:ring-pink-100 focus:border-pink-300 focus:bg-white outline-none transition-all mb-6 text-gray-700 resize-none"
                               placeholder="Напишите пару добрых слов о нас..."></textarea>
                     <button type="submit" 
-                            class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black hover:bg-pink-500 transition shadow-lg shadow-pink-100">
+                            class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-pink-500 transform active:scale-[0.98] transition-all shadow-lg shadow-gray-200 hover:shadow-pink-200">
                         Опубликовать отзыв
                     </button>
-                    <p class="text-[10px] text-gray-400 mt-4 text-center uppercase tracking-widest">
+                    <p class="text-[11px] text-gray-400 mt-5 text-center uppercase tracking-widest font-medium">
                         * Все отзывы проходят модерацию перед публикацией
                     </p>
                 </form>
             {% else %}
-                <div class="text-center py-6">
-                    <p class="text-gray-500 mb-6 font-medium">Чтобы оставить отзыв, нужно войти в аккаунт</p>
-                    <div class="flex gap-4 justify-center">
-                        <a href="{% url 'users:login' %}" class="px-8 py-3 bg-pink-500 text-white rounded-xl font-bold hover:shadow-lg transition">Войти</a>
-                        <a href="{% url 'users:register' %}" class="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">Регистрация</a>
+                <div class="text-center py-8 relative z-10">
+                    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🔒</div>
+                    <p class="text-gray-600 mb-8 font-medium text-lg">Чтобы оставить отзыв, нужно войти в аккаунт</p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="{% url 'users:login' %}" class="px-8 py-3.5 bg-pink-500 text-white rounded-xl font-bold hover:bg-pink-600 hover:shadow-lg hover:shadow-pink-200 transition-all">Войти</a>
+                        <a href="{% url 'users:register' %}" class="px-8 py-3.5 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all">Регистрация</a>
                     </div>
                 </div>
             {% endif %}
         </div>
     </section>
 </div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie) {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            c = c.trim();
+            if (c.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(c.substring(name.length + 1));
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function react(id, value) {
+    fetch(`/store/review/${id}/react/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken'),
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "value=" + value
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("likes-" + id).innerText = data.likes;
+        document.getElementById("dislikes-" + id).innerText = data.dislikes;
+
+        const likeBtn = document.getElementById("like-btn-" + id);
+        const dislikeBtn = document.getElementById("dislike-btn-" + id);
+
+        // Убираем активные классы с обеих кнопок
+        likeBtn.classList.remove("bg-green-100", "border-green-200", "text-green-800");
+        dislikeBtn.classList.remove("bg-red-100", "border-red-200", "text-red-800");
+
+        // Добавляем активные классы в зависимости от реакции пользователя
+        if (data.user_reaction === 1) {
+            likeBtn.classList.add("bg-green-100", "border-green-200", "text-green-800");
+        } else if (data.user_reaction === -1) {
+            dislikeBtn.classList.add("bg-red-100", "border-red-200", "text-red-800");
+        }
+    })
+    .catch(error => console.error('Ошибка при отправке реакции:', error));
+}
+</script>
 
 {% endblock %}

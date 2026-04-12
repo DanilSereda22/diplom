@@ -104,3 +104,47 @@ class ShopReview(models.Model):
 
     def __str__(self):
         return f"Отзыв от {self.user.username}"
+
+class ShopReview(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}"
+
+
+class ReviewReaction(models.Model):
+    LIKE = 1
+    DISLIKE = -1
+
+    VALUE_CHOICES = (
+        (LIKE, "Like"),
+        (DISLIKE, "Dislike"),
+    )
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    review = models.ForeignKey(
+        ShopReview,
+        on_delete=models.CASCADE,
+        related_name="reactions"
+    )
+    value = models.SmallIntegerField(choices=VALUE_CHOICES)
+    
+    @property
+    def likes_count(self):
+        return self.reactions.filter(value=1).count()
+
+    @property
+    def dislikes_count(self):
+        return self.reactions.filter(value=-1).count()
+
+    class Meta:
+        unique_together = ("user", "review")

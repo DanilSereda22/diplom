@@ -5,10 +5,26 @@
 
   <!-- HEADER -->
   <div class="flex items-center gap-4">
-    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-pink-200 to-blue-200
-                flex items-center justify-center text-2xl font-bold text-white">
-      {{ user.first_name|first|default:user.username|first|upper }}
+
+    <!-- КЛИКАБЕЛЬНЫЙ АВАТАР -->
+    <div onclick="document.getElementById('avatarInput').click()"
+         class="w-16 h-16 rounded-full overflow-hidden bg-gray-100 cursor-pointer group relative">
+
+      {% if user.avatar %}
+        <img src="{{ user.avatar.url }}" 
+             class="w-full h-full object-cover group-hover:opacity-70 transition">
+      {% else %}
+        <div class="w-full h-full flex items-center justify-center text-xl font-bold text-gray-700 group-hover:opacity-70">
+          {{ user.first_name|first|default:user.username|first|upper }}
+        </div>
+      {% endif %}
+
+      <!-- overlay -->
+      <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs font-bold">
+        Изменить
+      </div>
     </div>
+
     <div>
       <h2 class="text-2xl font-bold">Привет, {{ user.first_name|default:user.username }}!</h2>
       <p class="text-gray-500">Личный кабинет</p>
@@ -18,9 +34,14 @@
   <div class="grid md:grid-cols-3 gap-8">
 
     <!-- PROFILE -->
-    <form method="post"
+    <form method="post" enctype="multipart/form-data"
           class="bg-white p-6 rounded-3xl border space-y-4 md:col-span-1">
+
       {% csrf_token %}
+
+      <!-- СКРЫТЫЙ INPUT -->
+      <input type="file" id="avatarInput" name="avatar" class="hidden" accept="image/*">
+
       <h3 class="font-bold text-lg">Личные данные</h3>
 
       <input name="first_name" value="{{ user.first_name }}"
@@ -49,6 +70,7 @@
 
       {% for order in user.orders.all %}
       <div class="p-4 rounded-2xl border mb-3 hover:bg-pink-50/30">
+
         <div class="flex justify-between items-start">
 
           <div>
@@ -60,6 +82,7 @@
                 {{ order.get_status_display }}
               </span>
             </div>
+
             <div class="text-xs text-gray-400">
               {{ order.created_at|date:"d.m.Y H:i" }}
             </div>
@@ -72,7 +95,7 @@
 
             {% if order.status == "processing" %}
             <a href="{% url 'orders:payment' order.id %}"
-              class="inline-block mt-2 px-4 py-2 text-sm rounded-xl
+               class="inline-block mt-2 px-4 py-2 text-sm rounded-xl
                       bg-gray-900 text-white hover:bg-pink-500">
               Оплатить
             </a>
@@ -80,11 +103,11 @@
           </div>
 
         </div>
+
       </div>
       {% empty %}
       <p class="text-center text-gray-400">Заказов пока нет</p>
       {% endfor %}
-
     </div>
 
   </div>
@@ -98,6 +121,17 @@ document.getElementById("phone")?.addEventListener("input", e => {
                    v.slice(3,6)+(v[6]?"-":"")+
                    v.slice(6,8)+(v[8]?"-":"")+
                    v.slice(8,10);
+});
+</script>
+
+<!-- АВТОЗАГРУЗКА АВАТАРА -->
+<script>
+const avatarInput = document.getElementById("avatarInput");
+
+avatarInput?.addEventListener("change", () => {
+    if (avatarInput.files.length > 0) {
+        avatarInput.closest("form").submit();
+    }
 });
 </script>
 
