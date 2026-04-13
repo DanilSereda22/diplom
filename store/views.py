@@ -1,4 +1,4 @@
-# apps/store/views.py
+# store/views.py
 from django.shortcuts import render, get_object_or_404,redirect
 from django.core.paginator import Paginator
 from django.db.models import Q,Count
@@ -86,7 +86,11 @@ def product_list(request):
     })
 
 def product_detail(request, slug):
-    product = get_object_or_404(Product, slug=slug, available=True)
+    product = get_object_or_404(
+        Product.objects.all(),
+        Q(slug__iexact=slug)
+    )
+
     return render(request, "store/product_detail.html", {
         "product": product
     })

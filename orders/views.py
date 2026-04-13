@@ -3,16 +3,11 @@ from django.contrib import messages
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
-
 from .models import Order, OrderItem
 from store.models import Product
 from .forms import CheckoutForm
 from cart.cart import Cart
 
-
-# ----------------------
-# УТИЛИТЫ
-# ----------------------
 def is_courier(user):
     return user.is_staff
 
@@ -20,10 +15,7 @@ def is_courier(user):
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
 
-
-# ----------------------
 # ОФОРМЛЕНИЕ ЗАКАЗА
-# ----------------------
 @login_required(login_url='users:login')  # редирект на страницу логина
 def checkout_view(request):
     cart = Cart(request)
@@ -45,9 +37,7 @@ def checkout_view(request):
             order = form.save(commit=False)
             order.user = request.user
 
-            # ----------------------
             # СПИСАНИЕ БОНУСОВ
-            # ----------------------
             use_bonus = Decimal(request.POST.get("use_bonus") or 0)
             use_bonus = min(use_bonus, 350, request.user.bonus_points)
             order.bonus_used = use_bonus
@@ -56,10 +46,7 @@ def checkout_view(request):
 
             order.status = "processing"
             order.save()
-
-            # ----------------------
             # ДОБАВЛЕНИЕ ТОВАРОВ
-            # ----------------------
             for item in cart:
                 OrderItem.objects.create(
                     order=order,
@@ -75,10 +62,7 @@ def checkout_view(request):
 
     return render(request, "orders/checkout.html", {"form": form, "cart": cart, "user": request.user})
 
-
-# ----------------------
 # ОПЛАТА ЗАКАЗА
-# ----------------------
 @login_required(login_url='users:login')
 def payment(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -110,10 +94,7 @@ def payment(request, order_id):
 
     return render(request, "orders/payment.html", {"order": order})
 
-
-# ----------------------
 # СТРАНИЦА УСПЕШНОГО ЗАКАЗА
-# ----------------------
 @login_required(login_url='users:login')
 def order_success_view(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
@@ -125,10 +106,7 @@ def order_success_view(request, order_id):
         "bonus_added": bonus_added
     })
 
-
-# ----------------------
 # КУРЬЕР
-# ----------------------
 @login_required(login_url='users:login')
 @user_passes_test(is_courier)
 def courier_orders_view(request):
@@ -143,10 +121,7 @@ def complete_delivery_view(request, order_id):
     order.save()
     return redirect("orders:courier_orders")
 
-
-# ----------------------
 # АДМИНКА
-# ----------------------
 @user_passes_test(is_admin)
 def admin_orders_view(request):
     orders = Order.objects.all().prefetch_related("items__product").order_by("-created_at")
