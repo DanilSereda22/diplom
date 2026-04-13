@@ -257,27 +257,36 @@ def admin_sections(request):
 @staff_required
 def admin_add_section(request):
     if request.method == "POST":
-        form = HomeSectionForm(request.POST)
+        form = HomeSectionForm(request.POST, request.FILES)  # 👈 ВАЖНО
         if form.is_valid():
             form.save()
             messages.success(request, "Секция добавлена")
             return redirect("store:admin_sections")
     else:
         form = HomeSectionForm()
-    return render(request, "store/admin/section_form.html", {"form": form, "title": "Добавить секцию"})
+
+    return render(request, "store/admin/section_form.html", {
+        "form": form,
+        "title": "Добавить секцию"
+    })
 
 @staff_required
 def admin_edit_section(request, pk):
     section = get_object_or_404(HomeSection, pk=pk)
+
     if request.method == "POST":
-        form = HomeSectionForm(request.POST, instance=section)
+        form = HomeSectionForm(request.POST, request.FILES, instance=section)  # 👈 ВАЖНО
         if form.is_valid():
             form.save()
             messages.success(request, "Секция обновлена")
             return redirect("store:admin_sections")
     else:
         form = HomeSectionForm(instance=section)
-    return render(request, "store/admin/section_form.html", {"form": form, "title": "Редактировать секцию"})
+
+    return render(request, "store/admin/section_form.html", {
+        "form": form,
+        "title": "Редактировать секцию"
+    })
 
 @staff_required
 def admin_delete_section(request, pk):

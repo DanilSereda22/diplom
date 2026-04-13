@@ -3,6 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.db import models
 from django.conf import settings
+from PIL import Image
 
 def product_image_upload_to(instance, filename):
     return f"products/{instance.category.slug if instance.category else 'misc'}/{filename}"
@@ -42,10 +43,6 @@ class SubCategory(models.Model):
     def get_absolute_url(self):
         return reverse("store:subcategory", args=[self.slug])
 
-
-from django.db import models
-from django.urls import reverse
-
 class Product(models.Model):
     name = models.CharField("Название", max_length=255)
     slug = models.SlugField("Slug", max_length=255, unique=True, db_index=True)
@@ -58,12 +55,9 @@ class Product(models.Model):
 
     description = models.TextField("Описание", blank=True)
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
-
     stock = models.PositiveIntegerField("Количество на складе", default=0)
     weight = models.PositiveIntegerField("Вес (г)", default=0)
-
     image = models.ImageField(upload_to="products/", blank=True, null=True)
-
     available = models.BooleanField("Доступен", default=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -81,19 +75,56 @@ class Product(models.Model):
         return self.stock <= 0 or not self.available
 
     def save(self, *args, **kwargs):
-        # Авто-логика наличия
         if self.stock <= 0:
             self.available = False
+
         super().save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image.path).convert("RGB")
+
+            width, height = img.size
+            min_side = min(width, height)
+
+            # Центрируем crop
+            left = (width - min_side) / 2
+            top = (height - min_side) / 2
+            right = (width + min_side) / 2
+            bottom = (height + min_side) / 2
+
+            img = img.crop((left, top, right, bottom))
+            img = img.resize((850, 850), Image.LANCZOS)
+
+            img.save(self.image.path, format="JPEG", quality=90)
     
 class HomeSection(models.Model):
     title = models.CharField("Заголовок секции", max_length=120)
     slug = models.SlugField(unique=True)
+
     products = models.ManyToManyField(
         Product,
         verbose_name="Товары",
         blank=True
     )
+
+    # 👇 НОВОЕ
+    image = models.ImageField(
+        "Баннер (картинка)",
+        upload_to="sections/",
+        blank=True,
+        null=True
+    )
+
+    # 👇 куда ведёт (можно выбрать другую секцию)
+    link_section = models.ForeignKey(
+        "self",
+        verbose_name="Ссылка на секцию",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="linked_from"
+    )
+
     is_active = models.BooleanField("Активна", default=True)
     order = models.PositiveIntegerField("Порядок", default=0)
 
@@ -122,22 +153,6 @@ class ShopReview(models.Model):
 
     def __str__(self):
         return f"Отзыв от {self.user.username}"
-
-class ShopReview(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
-    text = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_approved = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.user.username}"
-
 
 class ReviewReaction(models.Model):
     LIKE = 1

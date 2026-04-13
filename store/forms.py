@@ -51,14 +51,29 @@ class SubCategoryForm(forms.ModelForm):
 class HomeSectionForm(forms.ModelForm):
     class Meta:
         model = HomeSection
-        fields = ["title", "slug", "products", "is_active", "order"]
+        fields = [
+            "title",
+            "slug",
+            "image",
+            "link_section",
+            "products",
+            "is_active",
+            "order"
+        ]
         widgets = {
-            "products": forms.CheckboxSelectMultiple,
+            "products": forms.CheckboxSelectMultiple(),
         }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         for field_name, field in self.fields.items():
             if field_name != "products":
-                field.widget.attrs.update({"class": "w-full p-2 rounded border"})
+                field.widget.attrs.update({
+                    "class": "w-full p-2 rounded border"
+                })
+
             if field_name == "slug":
-                field.widget.attrs.update({"readonly": "readonly"})
+                field.widget.attrs.update({
+                    "readonly": "readonly"
+                })

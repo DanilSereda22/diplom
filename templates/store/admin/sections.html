@@ -5,26 +5,60 @@
 
   <div class="flex justify-between items-center">
     <h1 class="text-3xl font-black">Секции главной страницы</h1>
-    <a href="{% url 'store:admin_add_section' %}" class="px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">
-      Добавить секцию
+
+    <a href="{% url 'store:admin_add_section' %}"
+       class="px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition">
+      Добавить
     </a>
   </div>
 
-  <ul class="bg-white border rounded-3xl p-6 space-y-2">
+  <ul class="bg-white border rounded-3xl p-6 space-y-4">
+
     {% for section in sections %}
-      <li class="flex justify-between items-center border-b p-2">
-        <div>
-          <p><b>{{ section.title }}</b></p>
-          <p class="text-gray-500 text-sm">Активна: {% if section.is_active %}Да{% else %}Нет{% endif %}</p>
+      <li class="flex justify-between items-center border-b pb-3">
+
+        <div class="flex items-center gap-4">
+
+          {% if section.image %}
+            <img src="{{ section.image.url }}"
+                 class="w-16 h-16 object-cover rounded-xl border">
+          {% endif %}
+
+          <div>
+            <p class="font-bold">{{ section.title }}</p>
+            <p class="text-gray-500 text-sm">
+              Активна: {% if section.is_active %}Да{% else %}Нет{% endif %}
+            </p>
+
+            {% if section.link_section %}
+              <p class="text-xs text-gray-400">
+                → ведет в: {{ section.link_section.title }}
+              </p>
+            {% endif %}
+          </div>
+
         </div>
+
         <div class="flex gap-2">
-          <a href="{% url 'store:admin_edit_section' section.id %}" class="px-4 py-2 rounded-xl bg-blue-100 text-blue-700 text-sm font-bold hover:bg-blue-200">Редактировать</a>
-          <a href="{% url 'store:admin_delete_section' section.id %}" onclick="return confirm('Удалить секцию?')" class="px-4 py-2 rounded-xl bg-red-100 text-red-700 text-sm font-bold hover:bg-red-200">Удалить</a>
+          <a href="{% url 'store:admin_edit_section' section.id %}"
+             class="px-4 py-2 rounded-xl bg-blue-100 text-blue-700 text-sm font-bold hover:bg-blue-200">
+            Редактировать
+          </a>
+
+          <a href="{% url 'store:admin_delete_section' section.id %}"
+             onclick="return confirm('Удалить секцию?')"
+             class="px-4 py-2 rounded-xl bg-red-100 text-red-700 text-sm font-bold hover:bg-red-200">
+            Удалить
+          </a>
         </div>
+
       </li>
     {% empty %}
-      <li class="text-center text-gray-400 p-2">Секций нет</li>
+      <li class="text-center text-gray-400">
+        Секций нет
+      </li>
     {% endfor %}
+
   </ul>
 
 </div>
