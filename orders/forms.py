@@ -45,14 +45,13 @@ class CheckoutForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["delivery_method"].empty_label = None
+        self.fields["delivery_method"].choices = Order.DELIVERY_CHOICES
 
     def clean(self):
         if self.cleaned_data.get("delivery_method") == "delivery" \
            and not self.cleaned_data.get("delivery_address"):
             self.add_error("delivery_address", "Укажите адрес доставки")
         return self.cleaned_data
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["delivery_method"].choices = Order.DELIVERY_CHOICES
+    
+
 
