@@ -107,7 +107,6 @@ class HomeSection(models.Model):
         blank=True
     )
 
-    # 👇 НОВОЕ
     image = models.ImageField(
         "Баннер (картинка)",
         upload_to="sections/",
@@ -115,7 +114,6 @@ class HomeSection(models.Model):
         null=True
     )
 
-    # 👇 куда ведёт (можно выбрать другую секцию)
     link_section = models.ForeignKey(
         "self",
         verbose_name="Ссылка на секцию",
