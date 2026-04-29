@@ -1,28 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4">
+<div class="max-w-5xl mx-auto px-4 py-8">
   <h2 class="text-3xl font-black mb-8 text-gray-800">Оформление заказа</h2>
 
   <div class="grid md:grid-cols-2 gap-10 items-start">
 
-    <!-- ФОРМА -->
-    <form method="post" class="space-y-6">
+    <form method="post" class="space-y-6" id="checkout-form">
       {% csrf_token %}
 
       <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 space-y-6">
 
-        <!-- Контактные данные -->
         <h3 class="font-bold text-lg">Контактные данные</h3>
 
-        <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Имя</label>
-          {{ form.first_name }}
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Фамилия</label>
-          {{ form.last_name }}
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Имя</label>
+            {{ form.first_name }}
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Фамилия</label>
+            {{ form.last_name }}
+          </div>
         </div>
 
         <div>
@@ -35,12 +34,12 @@
           {{ form.email }}
         </div>
 
-        <!-- Способ получения -->
         <h3 class="font-bold text-lg pt-2">Способ получения</h3>
-        <div>{{ form.delivery_method }}</div>
+        <div class="checkout-select-wrapper">
+          {{ form.delivery_method }}
+        </div>
 
-        <!-- ДОСТАВКА -->
-        <div id="delivery-fields" class="hidden space-y-4">
+        <div id="delivery-fields" class="hidden space-y-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Адрес доставки</label>
             {{ form.delivery_address }}
@@ -51,21 +50,24 @@
           </div>
         </div>
 
-        <!-- Бонусы -->
         {% if user.is_authenticated %}
-        <div class="mt-4">
-          <label class="block text-sm font-bold text-gray-600 mb-1">
-            Бонусы (доступно: {{ user.bonus_points|floatformat:0 }})
+        <div class="mt-4 p-4 bg-pink-50 rounded-2xl border border-pink-100">
+          <label class="block text-sm font-bold text-pink-700 mb-2">
+            Использовать бонусы (Доступно: {{ user.bonus_points|floatformat:0 }})
           </label>
-          <input type="number" min="0" step="1" name="use_bonus" id="use-bonus"
-                 class="w-full p-2 border rounded-lg" placeholder="Списать бонусы">
+          <input type="number" 
+                 min="0" 
+                 step="1" 
+                 name="use_bonus" 
+                 id="use-bonus"
+                 class="w-full p-3 border-2 border-pink-200 rounded-xl focus:outline-none focus:border-pink-500 transition-colors" 
+                 placeholder="Введите сумму бонусов"
+                 data-max-bonus="{{ user.bonus_points|floatformat:0 }}">
         </div>
         {% else %}
         <div class="p-4 bg-yellow-50 text-yellow-700 rounded-xl text-sm">
-          Для оформления заказа и получения бонусов необходимо 
-          <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" class="underline font-bold">
-            войти или зарегистрироваться
-          </a>.
+          Для использования бонусов необходимо 
+          <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" class="underline font-bold">войти</a>.
         </div>
         {% endif %}
 
@@ -73,19 +75,17 @@
 
       {% if user.is_authenticated %}
       <button type="submit"
-        class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg
-               hover:bg-pink-500 shadow-xl transition-all">
+        class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-pink-500 shadow-xl transition-all active:scale-[0.98]">
         Подтвердить заказ
       </button>
       {% else %}
       <a href="{% url 'users:login' %}?next={% url 'orders:checkout' %}" 
          class="w-full block text-center bg-gray-900 text-white py-4 rounded-2xl font-black text-lg hover:bg-pink-500 shadow-xl transition-all">
-        Войти или зарегистрироваться
+        Войти для заказа
       </a>
       {% endif %}
     </form>
 
-    <!-- КОРЗИНА -->
     <div class="bg-gray-50 p-6 rounded-[2rem] border-2 border-dashed border-gray-200 sticky top-24">
       <h3 class="font-bold text-lg mb-4">Ваш заказ</h3>
 
@@ -93,78 +93,128 @@
         {% for item in cart %}
         <li class="flex justify-between items-center text-sm">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-white rounded-xl p-1 border border-gray-100">
+            <div class="w-12 h-12 bg-white rounded-xl p-1 border border-gray-100 flex-shrink-0">
               {% if item.product.image %}
-                <img src="{{ item.product.image.url }}" class="w-full h-full object-contain">
+                <img src="{{ item.product.image.url }}" class="w-full h-full object-contain" alt="{{ item.product.name }}">
               {% endif %}
             </div>
             <div>
-              <p class="font-bold text-gray-800">{{ item.product.name }}</p>
+              <p class="font-bold text-gray-800 line-clamp-1">{{ item.product.name }}</p>
               <p class="text-gray-400">Кол-во: {{ item.quantity }}</p>
             </div>
           </div>
-          <span class="font-black text-gray-900">{{ item.total_price }}&nbsp;₽</span>
+          <span class="font-black text-gray-900 whitespace-nowrap">{{ item.total_price }}&nbsp;₽</span>
         </li>
         {% endfor %}
       </ul>
 
-      <div class="border-t pt-4 flex justify-between">
-        <span class="text-gray-500 font-bold">Итого:</span>
-        <span class="text-2xl font-black" id="total-price">{{ cart.get_total_price }}&nbsp;₽</span>
+      <div class="border-t border-gray-200 pt-4 space-y-2">
+        <div class="flex justify-between text-gray-500">
+          <span>Сумма:</span>
+          <span>{{ cart.get_total_price }}&nbsp;₽</span>
+        </div>
+        <div id="bonus-discount-row" class="flex justify-between text-pink-600 hidden">
+          <span>Скидка бонусами:</span>
+          <span id="bonus-amount">-0&nbsp;₽</span>
+        </div>
+        <div class="flex justify-between items-end pt-2">
+          <span class="text-gray-800 font-bold text-lg">Итого к оплате:</span>
+          <div class="text-right">
+            <span class="text-2xl font-black text-gray-900" 
+                  id="total-price" 
+                  data-original-total="{{ cart.get_total_price }}">
+              {{ cart.get_total_price }}&nbsp;₽
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- JS -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  const select = document.getElementById("id_delivery_method");
-  const fields = document.getElementById("delivery-fields");
+  // 1. Управление полями доставки
+  const deliverySelect = document.getElementById("id_delivery_method");
+  const deliveryFields = document.getElementById("delivery-fields");
 
-  // --- ДОСТАВКА ---
-  if (!select || !fields) {
-    console.log("NOT FOUND:", select, fields);
-  } else {
-    function toggleFields() {
-      console.log("CURRENT VALUE:", select.value);
-
-      if (select.value === "delivery") {
-        fields.classList.remove("hidden");
+  if (deliverySelect && deliveryFields) {
+    function toggleDelivery() {
+      if (deliverySelect.value === "delivery") {
+        deliveryFields.classList.remove("hidden");
       } else {
-        fields.classList.add("hidden");
+        deliveryFields.classList.add("hidden");
       }
     }
-
-    select.addEventListener("change", toggleFields);
-
-    // фикс тайминга (когда Django подставляет значение)
-    setTimeout(toggleFields, 50);
+    deliverySelect.addEventListener("change", toggleDelivery);
+    toggleDelivery(); // Запуск при загрузке
   }
 
-  // --- БОНУСЫ ---
+  // 2. Управление бонусами и ценой
   const bonusInput = document.getElementById("use-bonus");
-  const totalElem = document.getElementById("total-price");
+  const totalDisplay = document.getElementById("total-price");
+  const bonusRow = document.getElementById("bonus-discount-row");
+  const bonusAmountDisplay = document.getElementById("bonus-amount");
 
-  if (bonusInput && totalElem) {
-    const originalTotal = parseFloat(totalElem.textContent.replace(/\D/g,'')) || 0;
+  if (bonusInput && totalDisplay) {
+    // Получаем числа из data-атрибутов (гарантирует отсутствие ошибок парсинга текста)
+    const originalTotal = parseFloat(totalDisplay.dataset.originalTotal.replace(',', '.')) || 0;
+    const maxUserBonuses = parseFloat(bonusInput.dataset.maxBonus.replace(',', '.')) || 0;
 
-    bonusInput.addEventListener("input", () => {
-      let bonus = parseFloat(bonusInput.value) || 0;
-      const maxBonus = parseFloat("{{ user.bonus_points|default:0 }}") || 0;
+    bonusInput.addEventListener("input", function() {
+      let val = parseFloat(this.value) || 0;
 
-      if (bonus > maxBonus) {
-        bonus = maxBonus;
-        bonusInput.value = bonus;
+      // Валидация: не больше, чем есть у юзера
+      if (val > maxUserBonuses) {
+        val = maxUserBonuses;
       }
 
-      let newTotal = originalTotal - bonus;
-      if (newTotal < 0) newTotal = 0;
+      // Валидация: не больше, чем сумма заказа (чтобы цена не стала отрицательной)
+      if (val > originalTotal) {
+        val = originalTotal;
+      }
 
-      totalElem.textContent = newTotal.toFixed(0) + " ₽";
+      // Валидация: не меньше нуля
+      if (val < 0) {
+        val = 0;
+      }
+
+      // Обновляем значение в инпуте на исправленное
+      this.value = val > 0 ? val : '';
+
+      // Считаем новую итоговую цену
+      const newTotal = originalTotal - val;
+
+      // Обновляем основной ценник
+      totalDisplay.innerHTML = `${new Intl.NumberFormat('ru-RU').format(Math.round(newTotal))}&nbsp;₽`;
+
+      // Показываем/скрываем строку скидки
+      if (val > 0) {
+        bonusRow.classList.remove("hidden");
+        bonusAmountDisplay.innerHTML = `-${new Intl.NumberFormat('ru-RU').format(Math.round(val))}&nbsp;₽`;
+      } else {
+        bonusRow.classList.add("hidden");
+      }
     });
   }
 });
 </script>
+
+<style>
+  /* Дополнительные стили для полей Django, если они не стилизованы в forms.py */
+  input[type="text"], input[type="email"], input[type="number"], select, textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    outline: none;
+    transition: all 0.2s;
+  }
+  input:focus, select:focus {
+    border-color: #ec4899;
+    ring: 2px;
+    ring-color: #fce7f3;
+  }
+</style>
 {% endblock %}
