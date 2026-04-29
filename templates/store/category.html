@@ -14,22 +14,30 @@
       </div>
 
       <div class="mb-6 px-2">
-          <h1 class="text-2xl font-black text-gray-800 mb-2 leading-tight">{{ category.name }}</h1>
+          <h1 class="text-2xl font-black text-gray-800 mb-2 leading-tight">
+            {{ category.name }}
+          </h1>
           <p class="text-xs text-gray-400 leading-relaxed">
             {{ category.description|default:"Выберите раздел ниже" }}
           </p>
       </div>
 
-      <h3 class="font-bold text-gray-800 mb-3 uppercase text-[10px] tracking-widest opacity-50 px-2">Подкатегории</h3>
+      <h3 class="font-bold text-gray-800 mb-3 uppercase text-[10px] tracking-widest opacity-50 px-2">
+        Подкатегории
+      </h3>
+
       <ul class="space-y-1">
         {% for sub in category.subcategories.all %}
         <li>
           <a href="{{ sub.get_absolute_url }}" 
              class="flex items-center justify-between px-4 py-3 rounded-2xl text-gray-600 hover:bg-white hover:text-pink-600 transition group border border-transparent">
+
             <span class="text-sm font-bold">{{ sub.name }}</span>
+
             <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-400 group-hover:bg-pink-100 group-hover:text-pink-500 transition-colors">
-                {{ sub.products.count }}
+              {{ sub.products.count }}
             </span>
+
           </a>
         </li>
         {% empty %}
@@ -40,46 +48,79 @@
   </aside>
 
   <div class="w-full md:w-3/4">
-     <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-[2.5rem] border border-gray-50 shadow-sm">
-        <h2 class="text-2xl font-black text-gray-800">Товары в категории</h2>
-        <div class="bg-pink-50 px-4 py-2 rounded-2xl">
-          <p class="text-xs font-bold text-pink-500 uppercase tracking-widest">
-            Найдено: <span class="text-sm ml-1 text-pink-600">{{ products.paginator.count|default:products.count }}</span>
-          </p>
-        </div>
-     </div>
 
-     <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-       {% for product in products %}
-         <div class="group bg-white rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-pink-200 hover:-translate-y-1 overflow-hidden relative">
-           
-           <a href="{{ product.get_absolute_url }}" class="flex flex-col h-full p-4">
-             <div class="relative aspect-square w-full bg-white rounded-[2rem] mb-4 flex items-center justify-center overflow-hidden">
-                {% if product.image %}
-                   <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-500">
-                {% else %}
-                   <span class="text-4xl opacity-20">🍬</span>
-                {% endif %}
-             </div>
-             <div class="mt-auto">
-                 <h3 class="font-bold text-gray-800 text-sm md:text-base leading-tight mb-2 h-10 line-clamp-2 group-hover:text-pink-600 transition-colors">
-                   {{ product.name }}
-                 </h3>
-                 <span class="text-lg font-black text-gray-900">{{ product.price }}&nbsp;₽</span>
-             </div>
-           </a>
+    <!-- HEADER -->
+    <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-[2.5rem] border border-gray-50 shadow-sm">
+      <h2 class="text-2xl font-black text-gray-800">
+        Товары в категории
+      </h2>
 
-           <form method="POST" action="{% url 'cart:add_to_cart' product.id %}" class="absolute bottom-5 right-5">
-             {% csrf_token %}
-             <button type="submit" 
-                     class="w-11 h-11 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-500 hover:text-white flex items-center justify-center transition-all shadow-sm active:scale-95">
-               <span class="text-2xl font-bold">+</span>
-             </button>
-           </form>
+      <div class="bg-pink-50 px-4 py-2 rounded-2xl">
+        <p class="text-xs font-bold text-pink-500 uppercase tracking-widest">
+          Найдено:
+          <span class="text-sm ml-1 text-pink-600">
+            {{ products.paginator.count|default:products.count }}
+          </span>
+        </p>
+      </div>
+    </div>
 
-         </div>
-       {% endfor %}
-     </div>
+    <!-- PRODUCTS GRID -->
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+
+      {% for product in products %}
+      <div class="group bg-white rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-pink-200 hover:-translate-y-1 overflow-hidden relative flex flex-col">
+
+        <a href="{{ product.get_absolute_url }}" class="flex flex-col h-full p-4">
+
+          <!-- IMAGE -->
+          <div class="relative aspect-square w-full bg-white rounded-[2rem] mb-4 flex items-center justify-center overflow-hidden">
+
+            {% if product.image %}
+              <img src="{{ product.image.url }}"
+                   alt="{{ product.name }}"
+                   class="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-500">
+            {% else %}
+              <span class="text-4xl opacity-20">🍬</span>
+            {% endif %}
+
+          </div>
+
+          <!-- TITLE + PRICE -->
+          <div class="flex flex-col flex-1">
+
+            <h3 class="font-bold text-gray-800 text-sm md:text-base leading-snug mb-3 line-clamp-2 min-h-[42px] group-hover:text-pink-600 transition-colors">
+              {{ product.name }}
+            </h3>
+
+            <div class="mt-auto">
+              <span class="text-lg font-black text-gray-900">
+                {{ product.price }} ₽
+              </span>
+            </div>
+
+          </div>
+
+        </a>
+
+        <!-- ADD BUTTON -->
+        <form method="POST" action="{% url 'cart:add_to_cart' product.id %}" class="absolute bottom-5 right-5">
+          {% csrf_token %}
+
+          <button type="submit"
+                  class="w-11 h-11 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-500 hover:text-white flex items-center justify-center transition-all shadow-sm active:scale-95">
+
+            <span class="text-2xl font-bold">+</span>
+
+          </button>
+
+        </form>
+
+      </div>
+      {% endfor %}
+
+    </div>
+
   </div>
 </div>
 {% endblock %}

@@ -1,7 +1,7 @@
 # store/views.py
 from django.shortcuts import render, get_object_or_404,redirect
 from django.core.paginator import Paginator
-from django.db.models import Q,Count
+from django.db.models import Q,Count,Case, When, IntegerField
 from .models import Category, SubCategory, Product,HomeSection,ShopReview,ReviewReaction
 from .forms import SearchForm
 from django.contrib.auth.decorators import login_required,user_passes_test
@@ -62,14 +62,34 @@ def section_detail(request, slug):
         slug=slug,
         is_active=True
     )
+
+    products = section.products.filter(
+    ).annotate(
+        in_stock_order=Case(
+            When(stock__lte=0, then=1),
+            default=0,
+            output_field=IntegerField()
+        )
+    ).order_by("in_stock_order", "id")
+
     return render(request, "pages/section_detail.html", {
         "section": section,
-        "products": section.products.filter(available=True),
+        "products": products,
     })
 
+
+# PRODUCT LIST
 def product_list(request):
     form = SearchForm(request.GET or None)
-    products = Product.objects.filter(available=True).order_by("id")
+
+    products = Product.objects.filter(
+    ).annotate(
+        in_stock_order=Case(
+            When(stock__lte=0, then=1),
+            default=0,
+            output_field=IntegerField()
+        )
+    ).order_by("in_stock_order", "id")
 
     if form.is_valid():
         q = form.cleaned_data.get("q")
@@ -77,14 +97,18 @@ def product_list(request):
             products = products.filter(
                 Q(name__icontains=q) | Q(description__icontains=q)
             )
+
     paginator = Paginator(products, 12)
     page = request.GET.get("page")
     products = paginator.get_page(page)
+
     return render(request, "store/product_list.html", {
         "products": products,
         "form": form,
     })
 
+
+# PRODUCT DETAIL
 def product_detail(request, slug):
     product = get_object_or_404(
         Product.objects.all(),
@@ -95,19 +119,43 @@ def product_detail(request, slug):
         "product": product
     })
 
+
+# CATEGORY
 def category_view(request, slug):
     category = get_object_or_404(Category, slug=slug)
     subcategories = category.subcategories.all()
-    products = Product.objects.filter(category__in=subcategories, available=True)
+
+    products = Product.objects.filter(
+        category__in=subcategories,
+    ).annotate(
+        in_stock_order=Case(
+            When(stock__lte=0, then=1),
+            default=0,
+            output_field=IntegerField()
+        )
+    ).order_by("in_stock_order", "id")
+
     return render(request, "store/category.html", {
         "category": category,
         "products": products,
         "subcategories": subcategories,
     })
 
+
+# SUBCATEGORY
 def subcategory_view(request, slug):
     subcategory = get_object_or_404(SubCategory, slug=slug)
-    products = Product.objects.filter(category=subcategory, available=True)
+
+    products = Product.objects.filter(
+        category=subcategory,
+    ).annotate(
+        in_stock_order=Case(
+            When(stock__lte=0, then=1),
+            default=0,
+            output_field=IntegerField()
+        )
+    ).order_by("in_stock_order", "id")
+
     return render(request, "store/subcategory.html", {
         "subcategory": subcategory,
         "products": products,

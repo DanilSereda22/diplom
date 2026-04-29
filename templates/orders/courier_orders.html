@@ -1,53 +1,62 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="max-w-6xl mx-auto">
+<div class="max-w-6xl mx-auto px-3 sm:px-4">
 
-  <div class="flex justify-between items-center mb-8">
-    <h2 class="text-3xl font-black text-gray-800">Заказы на доставку</h2>
+  <!-- HEADER -->
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+    <h2 class="text-2xl sm:text-3xl font-black text-gray-800">
+      Заказы на доставку
+    </h2>
+
     <a href="{% url 'orders:courier_orders' %}"
-       class="px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">
+       class="w-full sm:w-auto text-center px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">
        Обновить
     </a>
   </div>
 
-  <div class="space-y-5">
+  <div class="space-y-4 sm:space-y-5">
     {% for order in orders %}
-      <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm">
 
         <!-- HEADER -->
-        <div class="flex justify-between items-center mb-3">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
           <div>
-            <div class="font-bold">Заказ №{{ order.id }}</div>
+            <div class="font-bold text-sm sm:text-base">
+              Заказ №{{ order.id }}
+            </div>
             <div class="text-xs text-gray-400">
               {{ order.created_at|date:"d.m.Y H:i" }}
             </div>
           </div>
 
-          <div class="font-black text-lg">
+          <div class="font-black text-base sm:text-lg">
             {{ order.total_price }} ₽
           </div>
         </div>
 
         <!-- КЛИЕНТ + АДРЕС -->
-        <div class="grid md:grid-cols-2 gap-3 text-sm mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-4">
 
           <div>
             <div class="text-gray-400 text-xs font-bold mb-1">Клиент</div>
-            <div class="font-semibold">
+            <div class="font-semibold break-words">
               {{ order.first_name }} {{ order.last_name }}
             </div>
-            <div class="text-gray-600">{{ order.phone }}</div>
+            <div class="text-gray-600 break-words">
+              {{ order.phone }}
+            </div>
           </div>
 
           <div>
             <div class="text-gray-400 text-xs font-bold mb-1">Доставка</div>
-            <div class="font-semibold">
+            <div class="font-semibold break-words">
               {{ order.delivery_address }}
             </div>
 
             {% if order.delivery_comment %}
-              <div class="text-xs text-gray-500 mt-1">
+              <div class="text-xs text-gray-500 mt-1 break-words">
                 {{ order.delivery_comment }}
               </div>
             {% endif %}
@@ -55,26 +64,26 @@
 
         </div>
 
-        <!-- ✅ ТОВАРЫ (КОМПАКТНО) -->
+        <!-- ТОВАРЫ -->
         <div class="bg-gray-50 rounded-xl p-3 space-y-2">
 
           {% for item in order.items.all %}
-            <div class="flex items-center gap-3 text-sm">
+            <div class="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
 
               {% if item.product.image %}
                 <img src="{{ item.product.image.url }}"
-                     class="w-10 h-10 rounded-lg object-cover">
+                     class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover shrink-0">
               {% endif %}
 
               <div class="flex-1 truncate">
                 {{ item.product.name }}
               </div>
 
-              <div class="text-gray-500">
+              <div class="text-gray-500 whitespace-nowrap">
                 x{{ item.quantity }}
               </div>
 
-              <div class="font-semibold">
+              <div class="font-semibold whitespace-nowrap">
                 {{ item.total_price }} ₽
               </div>
 
@@ -84,9 +93,9 @@
         </div>
 
         <!-- КНОПКА -->
-        <div class="mt-4 text-right">
+        <div class="mt-4">
           <a href="{% url 'orders:complete_delivery' order.id %}"
-             class="px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">
+             class="block sm:inline-block w-full sm:w-auto text-center px-4 py-2 rounded-xl bg-gray-900 text-white font-bold hover:bg-pink-500 transition text-sm">
              Завершить
           </a>
         </div>
@@ -94,7 +103,7 @@
       </div>
 
     {% empty %}
-      <div class="text-center text-gray-400 py-16 text-lg">
+      <div class="text-center text-gray-400 py-12 sm:py-16 text-base sm:text-lg">
         Нет заказов для доставки
       </div>
     {% endfor %}
