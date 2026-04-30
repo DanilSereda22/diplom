@@ -2,135 +2,158 @@
 {% block content %}
 
 <div class="flex flex-col md:flex-row gap-8">
-
+  <!-- Боковая панель -->
   <aside class="w-full md:w-1/4">
     <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 sticky top-24">
-
-      <h3 class="font-bold text-gray-800 mb-4 uppercase text-[10px] tracking-widest opacity-50">
-        Категории
-      </h3>
-
+      <h3 class="font-bold text-gray-800 mb-4 uppercase text-[10px] tracking-widest opacity-50 px-2">Категории</h3>
       <ul class="space-y-1">
-
         <li>
-          <a href="{% url 'store:product_list' %}"
-             class="flex items-center justify-between px-4 py-3 rounded-2xl transition {% if not category %}bg-pink-50 text-pink-600 font-bold{% else %}text-gray-600 hover:bg-white{% endif %}">
+          <a href="{% url 'store:product_list' %}" class="flex items-center justify-between px-4 py-3 rounded-2xl transition {% if not category %}bg-pink-50 text-pink-600 font-bold{% else %}text-gray-600 hover:bg-white{% endif %}">
             <span class="text-sm">Все товары</span>
           </a>
         </li>
-
         {% for cat in categories %}
         <li>
-          <a href="{{ cat.get_absolute_url }}"
-             class="flex items-center justify-between px-4 py-3 rounded-2xl transition {% if category.slug == cat.slug %}bg-pink-50 text-pink-600 font-bold{% else %}text-gray-600 hover:bg-white{% endif %}">
+          <a href="{{ cat.get_absolute_url }}" class="flex items-center justify-between px-4 py-3 rounded-2xl transition {% if category.slug == cat.slug %}bg-pink-50 text-pink-600 font-bold{% else %}text-gray-600 hover:bg-white{% endif %}">
             <span class="text-sm">{{ cat.name }}</span>
-            <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-500">
-              {{ cat.products.count }}
-            </span>
+            <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-500">{{ cat.products.count }}</span>
           </a>
         </li>
         {% endfor %}
-
       </ul>
     </div>
   </aside>
 
+  <!-- Список товаров -->
   <div class="w-full md:w-3/4">
-
     <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-[2.5rem] border border-gray-50 shadow-sm">
-      <h1 class="text-3xl font-black text-gray-800">
-        {% if category %}{{ category.name }}{% else %}Каталог{% endif %}
-      </h1>
-
+      <h1 class="text-3xl font-black text-gray-800">{% if category %}{{ category.name }}{% else %}Каталог{% endif %}</h1>
       <div class="bg-pink-50 px-4 py-2 rounded-2xl">
-        <p class="text-xs font-bold text-pink-500 uppercase tracking-widest">
-          Найдено:
-          <span class="text-sm ml-1 text-pink-600">
-            {{ products.paginator.count|default:products.count }}
-          </span>
-        </p>
+        <p class="text-xs font-bold text-pink-500 uppercase tracking-widest">Найдено: <span class="text-sm ml-1 text-pink-600">{{ products.paginator.count|default:products.count }}</span></p>
       </div>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-
       {% for p in products %}
         {% if not p.is_out_of_stock %}
         <div class="group bg-white rounded-[2.5rem] border border-gray-100 hover:border-pink-200 hover:-translate-y-1 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl relative flex flex-col h-full">
-
-          <a href="{{ p.get_absolute_url }}" class="flex flex-col flex-grow p-4 pb-0 relative">
+          <a href="{{ p.get_absolute_url }}" class="flex flex-col flex-grow p-4">
             <div class="relative aspect-square w-full bg-white rounded-[2rem] mb-4 flex items-center justify-center overflow-hidden shrink-0">
-              {% if p.image %}
-                <img src="{{ p.image.url }}" class="w-full h-full object-contain p-4 transition duration-500 group-hover:scale-110">
-              {% endif %}
+              {% if p.image %}<img src="{{ p.image.url }}" id="prod-img-{{ p.id }}" class="w-full h-full object-contain p-4 transition duration-500 group-hover:scale-110">{% endif %}
             </div>
-
-            <div class="flex-grow flex flex-col">
-              <h3 class="font-bold text-gray-800 text-sm md:text-base mb-3 line-clamp-2 leading-tight group-hover:text-pink-600 transition">
-                {{ p.name }}
-              </h3>
-            </div>
+            <h3 class="font-bold text-gray-800 text-sm md:text-base mb-3 line-clamp-2 leading-tight group-hover:text-pink-600 transition" id="prod-name-{{ p.id }}">{{ p.name }}</h3>
           </a>
-
-          <div class="p-4 pt-2 mt-auto flex items-center justify-between w-full">
-            <span class="text-xl font-black text-gray-900">{{ p.price }} ₽</span>
-            
-            <form method="POST" action="{% url 'cart:add_to_cart' p.id %}" class="m-0">
-              {% csrf_token %}
-              <button type="submit" class="w-11 h-11 rounded-full bg-pink-50 text-pink-500 hover:bg-pink-500 hover:text-white flex items-center justify-center transition-all shadow-sm active:scale-95 focus:outline-none focus:ring-4 focus:ring-pink-100">
+          <div class="p-5 pt-2 mt-auto flex items-center justify-between w-full">
+            <span class="text-xl font-black text-gray-900"><span id="prod-price-{{ p.id }}">{{ p.price }}</span>&nbsp;₽</span>
+            <button type="button" onclick="openQuickAdd('{{ p.id }}', '{{ p.stock }}')" class="w-12 h-12 rounded-2xl bg-pink-50 text-pink-500 hover:bg-pink-500 hover:text-white flex items-center justify-center transition-all shadow-sm active:scale-90">
                 <span class="text-2xl font-bold">+</span>
-              </button>
-            </form>
+            </button>
           </div>
-
         </div>
         {% endif %}
       {% endfor %}
 
+      <!-- Out of Stock (опционально, можно оставить) -->
       {% for p in products %}
         {% if p.is_out_of_stock %}
-        <div class="group bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-sm relative flex flex-col h-full opacity-70">
-
-          <a href="{{ p.get_absolute_url }}" class="flex flex-col flex-grow p-4 pb-0 relative">
-            <div class="relative aspect-square w-full bg-white rounded-[2rem] mb-4 flex items-center justify-center overflow-hidden shrink-0">
-              {% if p.image %}
-                <img src="{{ p.image.url }}" class="w-full h-full object-contain p-4 opacity-40">
-              {% endif %}
-              
-              <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
-                <span class="text-red-500 font-black text-sm uppercase tracking-widest text-center">Нет в продаже</span>
-              </div>
+        <div class="bg-white rounded-[2.5rem] border border-gray-100 overflow-hidden shadow-sm flex flex-col h-full opacity-60">
+            <div class="p-4">
+                <div class="aspect-square bg-white rounded-[2rem] mb-4 flex items-center justify-center relative">
+                    {% if p.image %}<img src="{{ p.image.url }}" class="w-full h-full object-contain p-4 opacity-40">{% endif %}
+                    <div class="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center rounded-[2rem]"><span class="text-red-500 font-black text-sm uppercase">Нет в наличии</span></div>
+                </div>
+                <h3 class="font-bold text-gray-800 text-sm line-clamp-2">{{ p.name }}</h3>
             </div>
-
-            <div class="flex-grow flex flex-col">
-              <h3 class="font-bold text-gray-800 text-sm md:text-base mb-3 line-clamp-2 leading-tight">
-                {{ p.name }}
-              </h3>
-            </div>
-          </a>
-
-          <div class="p-4 pt-2 mt-auto flex items-center justify-between w-full">
-            <span class="text-xl font-black text-gray-400">{{ p.price }} ₽</span>
-          </div>
-
         </div>
         {% endif %}
       {% endfor %}
-
     </div>
 
+    <!-- Пагинация -->
     {% if products.has_other_pages %}
     <div class="mt-12 flex justify-center gap-2">
       {% for num in products.paginator.page_range %}
-        <a href="?page={{ num }}"
-           class="w-10 h-10 flex items-center justify-center rounded-xl {% if products.number == num %}bg-pink-500 text-white{% else %}bg-white text-gray-400 hover:bg-pink-50{% endif %} transition font-bold shadow-sm border border-gray-100">
-          {{ num }}
-        </a>
+        <a href="?page={{ num }}" class="w-10 h-10 flex items-center justify-center rounded-xl {% if products.number == num %}bg-pink-500 text-white{% else %}bg-white text-gray-400 hover:bg-pink-50{% endif %} transition font-bold shadow-sm border border-gray-100">{{ num }}</a>
       {% endfor %}
     </div>
     {% endif %}
-
   </div>
 </div>
 
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div id="quick-add-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onclick="closeModal()"></div>
+  <div class="relative bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-in">
+    <button onclick="closeModal()" class="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-400 hover:text-gray-800 rounded-full z-20"><span>&times;</span></button>
+    <div class="p-8 md:p-12">
+      <h2 class="text-3xl font-black text-gray-800 mb-8">Добавлено 🥳</h2>
+      <div class="flex flex-col md:flex-row gap-8 items-center mb-10">
+        <div class="w-48 h-48 bg-white border border-gray-100 rounded-[2.5rem] p-4 flex items-center justify-center shrink-0">
+          <img id="modal-img" src="" class="w-full h-full object-contain">
+        </div>
+        <div class="flex-grow text-center md:text-left">
+          <h3 id="modal-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
+          <div class="flex items-center gap-6 justify-center md:justify-start">
+            <span class="text-3xl font-black text-gray-900"><span id="modal-price"></span>&nbsp;₽</span>
+            <div class="flex items-center gap-2 bg-pink-50 p-2 rounded-2xl border border-pink-100">
+              <button onclick="changeModalQty(-1)" class="w-10 h-10 rounded-xl bg-white shadow-sm font-bold text-pink-500 hover:bg-pink-500 hover:text-white">-</button>
+              <input type="number" id="modal-qty" value="1" oninput="validateManualInput(this)" class="w-16 text-center bg-transparent font-black text-xl border-none focus:ring-0">
+              <button onclick="changeModalQty(1)" class="w-10 h-10 rounded-xl bg-white shadow-sm font-bold text-pink-500 hover:bg-pink-500 hover:text-white">+</button>
+            </div>
+          </div>
+          <p id="stock-warning" class="text-red-500 text-[11px] font-bold mt-4 hidden uppercase bg-red-50 py-1.5 px-4 rounded-full w-fit mx-auto md:mx-0 border border-red-100">Максимум в наличии</p>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
+        <p class="text-gray-500 text-sm">В корзине <span id="cart-count-info" class="text-pink-500 font-bold">0</span> товаров на <span id="cart-total-info" class="text-gray-900 font-black">0</span>&nbsp;₽</p>
+        <div class="flex gap-3 w-full md:w-auto">
+          <button onclick="closeModal()" class="flex-1 px-6 py-4 rounded-2xl bg-gray-100 text-gray-500 font-bold hover:bg-gray-200 text-[10px] uppercase">Продолжить покупки</button>
+          <a href="{% url 'cart:cart_detail' %}" class="flex-1 px-8 py-4 rounded-2xl bg-gray-900 text-white font-bold hover:bg-pink-500 text-sm text-center">В корзину</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentProductId = null, currentMaxStock = 0;
+  function openQuickAdd(id, stock) {
+    currentProductId = id; currentMaxStock = parseInt(stock);
+    document.getElementById('modal-title').innerText = document.getElementById(`prod-name-${id}`).innerText;
+    document.getElementById('modal-price').innerText = document.getElementById(`prod-price-${id}`).innerText;
+    document.getElementById('modal-img').src = document.getElementById(`prod-img-${id}`).src;
+    document.getElementById('modal-qty').value = 1;
+    document.getElementById('stock-warning').classList.add('hidden');
+    sendToCart(id, 1, false);
+    document.getElementById('quick-add-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() { document.getElementById('quick-add-modal').classList.add('hidden'); document.body.style.overflow = ''; }
+  function changeModalQty(delta) { applyQuantity(parseInt(document.getElementById('modal-qty').value) + delta); }
+  function validateManualInput(input) { let v = parseInt(input.value); if (!isNaN(v)) applyQuantity(v); }
+  function applyQuantity(num) {
+    let final = num; const warn = document.getElementById('stock-warning');
+    if (final > currentMaxStock) { final = currentMaxStock; warn.classList.remove('hidden'); }
+    else { warn.classList.add('hidden'); if (final < 1) final = 1; }
+    document.getElementById('modal-qty').value = final;
+    sendToCart(currentProductId, final, true);
+  }
+  function sendToCart(productId, quantity, override) {
+    const fd = new FormData(); fd.append('quantity', quantity); fd.append('override', override ? 'true' : 'false');
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch(`/cart/add/${productId}/`, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(r => r.json()).then(data => {
+      if (data.status === 'success') {
+        document.getElementById('cart-count-info').innerText = data.cart_total_quantity;
+        document.getElementById('cart-total-info').innerText = data.cart_total_price.toLocaleString();
+      }
+    });
+  }
+</script>
+
+<style>
+  .animate-in { animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+</style>
 {% endblock %}

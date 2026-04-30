@@ -16,7 +16,7 @@
 
   <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden grid md:grid-cols-2">
 
-    <!-- IMAGE BLOCK (фон изменен на белый) -->
+    <!-- IMAGE BLOCK -->
     <div class="relative bg-white flex items-center justify-center p-10">
 
       <div class="w-full max-w-[400px] aspect-square flex items-center justify-center relative group">
@@ -70,7 +70,7 @@
           {% endif %}
         </div>
 
-        <!-- DESCRIPTION (адаптивный блок) -->
+        <!-- DESCRIPTION -->
         <div class="text-gray-600 leading-relaxed max-h-[300px] overflow-y-auto pr-2 custom-scroll">
           {{ product.description|linebreaks }}
         </div>
@@ -83,7 +83,10 @@
         {% if not product.is_out_of_stock %}
         <form action="{% url 'cart:cart_add' product.pk %}" method="post" class="flex gap-4">
           {% csrf_token %}
-          <input type="number" name="quantity" value="1" min="1"
+          
+          <!-- ДОБАВЛЕН атрибут max и скрипт oninput для строгой проверки -->
+          <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}"
+                 oninput="if(this.value > {{ product.stock }}) this.value = {{ product.stock }};"
                  class="w-20 p-3 rounded-2xl border border-gray-200 text-center font-bold focus:ring-2 focus:ring-pink-200 outline-none">
 
           <button type="submit"
@@ -97,11 +100,11 @@
         </div>
         {% endif %}
 
-        <div class="mt-6 flex gap-6 text-xs font-bold uppercase tracking-widest">
+        <div class="mt-6 flex flex-wrap gap-6 text-xs font-bold uppercase tracking-widest">
           {% if product.is_out_of_stock %}
             <span class="text-red-500">✖ Нет в наличии</span>
           {% else %}
-            <span class="text-green-500">✓ В наличии</span>
+            <span class="text-green-500">✓ В наличии: {{ product.stock }} шт.</span>
           {% endif %}
           <span class="text-blue-500">⚡ Доставка 24ч</span>
         </div>

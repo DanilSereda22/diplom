@@ -1,100 +1,144 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="max-w-5xl mx-auto space-y-10">
+<div class="max-w-6xl mx-auto py-10 px-4 space-y-10">
 
-  <h1 class="text-4xl font-black text-center">
+  <h1 class="text-4xl md:text-5xl font-black text-center text-gray-800">
     Панель администратора
   </h1>
 
-  <div class="grid md:grid-cols-3 gap-6">
+  <div class="grid md:grid-cols-3 gap-8">
+
+    <!-- Карточка -->
+    {% comment %} Универсальный стиль карточек {% endcomment %}
 
     <!-- ЗАКАЗЫ -->
     <a href="{% url 'orders:admin_orders' %}"
-       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
-      <div class="text-5xl mb-4">📦</div>
-      <h2 class="text-xl font-bold group-hover:text-pink-500">
+       class="group bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl transition duration-300">
+
+      <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-pink-100 to-pink-50 text-3xl mb-5
+                  group-hover:scale-110 group-hover:rotate-3 transition duration-300 shadow-inner">
+        📦
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 group-hover:text-pink-500 transition">
         Заказы
       </h2>
-      <p class="text-gray-500 text-sm mt-1">
+
+      <p class="text-gray-500 text-sm mt-2">
         Просмотр и управление заказами
       </p>
     </a>
 
     <!-- ПОЛЬЗОВАТЕЛИ -->
     <a href="{% url 'users:admin_users' %}"
-       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
-      <div class="text-5xl mb-4">👤</div>
-      <h2 class="text-xl font-bold group-hover:text-pink-500">
+       class="group bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl transition duration-300">
+
+      <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-blue-50 text-3xl mb-5
+                  group-hover:scale-110 group-hover:rotate-3 transition duration-300 shadow-inner">
+        👤
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 group-hover:text-blue-500 transition">
         Пользователи
       </h2>
-      <p class="text-gray-500 text-sm mt-1">
+
+      <p class="text-gray-500 text-sm mt-2">
         Управление аккаунтами
       </p>
     </a>
 
     <!-- ТОВАРЫ -->
     <a href="{% url 'store:admin_products' %}"
-       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
-      <div class="text-5xl mb-4">🛒</div>
-      <h2 class="text-xl font-bold group-hover:text-pink-500">
+       class="group bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl transition duration-300">
+
+      <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-100 to-yellow-50 text-3xl mb-5
+                  group-hover:scale-110 group-hover:rotate-3 transition duration-300 shadow-inner">
+        🛒
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 group-hover:text-yellow-500 transition">
         Товары
       </h2>
-      <p class="text-gray-500 text-sm mt-1">
+
+      <p class="text-gray-500 text-sm mt-2">
         Добавление, редактирование и удаление товаров
       </p>
     </a>
 
     <!-- КАТЕГОРИИ -->
     <a href="{% url 'store:admin_categories' %}"
-       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
-      <div class="text-5xl mb-4">📂</div>
-      <h2 class="text-xl font-bold group-hover:text-pink-500">
+       class="group bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl transition duration-300">
+
+      <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-purple-100 to-purple-50 text-3xl mb-5
+                  group-hover:scale-110 group-hover:rotate-3 transition duration-300 shadow-inner">
+        📂
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 group-hover:text-purple-500 transition">
         Категории
       </h2>
-      <p class="text-gray-500 text-sm mt-1">
+
+      <p class="text-gray-500 text-sm mt-2">
         Управление категориями товаров
       </p>
     </a>
 
     <!-- ПОДКАТЕГОРИИ -->
     <a href="{% url 'store:admin_subcategories' %}"
-       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
-      <div class="text-5xl mb-4">📑</div>
-      <h2 class="text-xl font-bold group-hover:text-pink-500">
+       class="group bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl transition duration-300">
+
+      <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-50 text-3xl mb-5
+                  group-hover:scale-110 group-hover:rotate-3 transition duration-300 shadow-inner">
+        📑
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 group-hover:text-indigo-500 transition">
         Подкатегории
       </h2>
-      <p class="text-gray-500 text-sm mt-1">
+
+      <p class="text-gray-500 text-sm mt-2">
         Управление подкатегориями
       </p>
     </a>
 
-    <!-- СЕКЦИИ ГЛАВНОЙ -->
+    <!-- СЕКЦИИ -->
     <a href="{% url 'store:admin_sections' %}"
-       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
-      <div class="text-5xl mb-4">🏠</div>
-      <h2 class="text-xl font-bold group-hover:text-pink-500">
+       class="group bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl transition duration-300">
+
+      <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-green-100 to-green-50 text-3xl mb-5
+                  group-hover:scale-110 group-hover:rotate-3 transition duration-300 shadow-inner">
+        🏠
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 group-hover:text-green-500 transition">
         Секции главной
       </h2>
-      <p class="text-gray-500 text-sm mt-1">
-        Настройка главной страницы магазина
+
+      <p class="text-gray-500 text-sm mt-2">
+        Настройка главной страницы
       </p>
     </a>
 
     <!-- ОТЗЫВЫ -->
     <a href="{% url 'store:admin_reviews' %}"
-       class="group bg-white border rounded-3xl p-6 hover:shadow-xl transition">
-      <div class="text-5xl mb-4">💬</div>
-      <h2 class="text-xl font-bold group-hover:text-pink-500">
+       class="group bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm hover:shadow-2xl transition duration-300">
+
+      <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-rose-100 to-rose-50 text-3xl mb-5
+                  group-hover:scale-110 group-hover:rotate-3 transition duration-300 shadow-inner">
+        💬
+      </div>
+
+      <h2 class="text-xl font-bold text-gray-800 group-hover:text-rose-500 transition">
         Отзывы
       </h2>
-      <p class="text-gray-500 text-sm mt-1">
-        Одобрение и удаление отзывов пользователей
+
+      <p class="text-gray-500 text-sm mt-2">
+        Модерация отзывов пользователей
       </p>
     </a>
 
   </div>
-
 </div>
 
 {% endblock %}
