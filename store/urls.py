@@ -18,7 +18,11 @@ urlpatterns = [
     path("privacy/", views.privacy, name="privacy"),
     path("terms/", views.terms, name="terms"),
     path("about/", views.about_page, name="about"),
-
+    path('ai/chat/', views.ai_chat),
+    path('ai/add-to-cart/', views.ai_add_to_cart),
+    path('ai/bulk-add-to-cart/', views.ai_bulk_add_to_cart),
+    path('ai/history/', views.chat_history),
+    path('ai/clear/', views.clear_chat),
     # админка
     path("admin/dashboard/", views.admin_dashboard, name="admin_dashboard"),
     path("admin/products/", views.admin_products, name="admin_products"),

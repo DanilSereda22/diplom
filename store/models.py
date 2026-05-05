@@ -1,9 +1,9 @@
 # store/models.py
 from django.db import models
 from django.urls import reverse
-from django.db import models
 from django.conf import settings
 from PIL import Image
+from django.contrib.auth.models import User
 
 def product_image_upload_to(instance, filename):
     return f"products/{instance.category.slug if instance.category else 'misc'}/{filename}"
@@ -179,3 +179,25 @@ class ReviewReaction(models.Model):
 
     class Meta:
         unique_together = ("user", "review")
+
+
+class ChatMessage(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="chat_messages"
+    )
+
+    # сообщение пользователя
+    message = models.TextField()
+
+    # обычный текстовый ответ
+    reply_text = models.TextField(blank=True, null=True)
+
+    # структурированный ответ (товары, режимы)
+    reply_json = models.JSONField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user}: {self.message[:30]}"

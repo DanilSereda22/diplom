@@ -2,12 +2,18 @@
 from django.shortcuts import render, get_object_or_404,redirect
 from django.core.paginator import Paginator
 from django.db.models import Q,Count,Case, When, IntegerField
-from .models import Category, SubCategory, Product,HomeSection,ShopReview,ReviewReaction
+from .models import *
 from .forms import SearchForm
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.contrib import messages
 from .forms import ProductForm, CategoryForm, SubCategoryForm, HomeSectionForm
 from django.http import JsonResponse
+import json
+from django.views.decorators.csrf import csrf_exempt
+from cart.cart import Cart
+from django.views.decorators.http import require_POST
+from .chat_service import ask_gigachat
+import traceback
 
 def about_page(request):
     reviews = ShopReview.objects.filter(is_approved=True).annotate(
@@ -397,3 +403,251 @@ def toggle_reaction(request, review_id):
         "dislikes": dislikes,
         "user_reaction": user_reaction
     })
+
+# =========================
+# 🤖 AI CHAT
+# =========================
+
+@login_required
+@require_POST
+def clear_chat(request):
+    ChatMessage.objects.filter(user=request.user).delete()
+    return JsonResponse({"success": True})
+
+@login_required
+def chat_history(request):
+    messages = ChatMessage.objects.filter(
+        user=request.user
+    ).order_by("created_at")[:50]
+
+    history = []
+
+    for msg in messages:
+
+        # 👉 сообщение пользователя
+        history.append({
+            "type": "user",
+            "text": msg.message
+        })
+
+        # 👉 если структурированный ответ (товары)
+        if msg.reply_json:
+            history.append({
+                "type": "structured",
+                "data": msg.reply_json
+            })
+
+        # 👉 обычный текст
+        elif msg.reply_text:
+            history.append({
+                "type": "bot",
+                "text": msg.reply_text
+            })
+
+    return JsonResponse({"history": history})
+
+from .chat_service import (
+    ask_gigachat,
+    extract_budget,
+    get_products_for_budget,
+    find_products_by_text,
+    get_gift_set
+)
+
+@csrf_exempt
+def ai_chat(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+
+    try:
+        # ✅ безопасный парсинг
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except:
+            return JsonResponse({"reply": "Ошибка запроса"}, status=400)
+
+        message = data.get("message", "").strip()
+
+        if not message:
+            return JsonResponse({"reply": "✍️ Напиши вопрос"})
+
+        print(f"🤖 USER: {message}")
+
+        # =========================
+        # 🎯 1. БЮДЖЕТ
+        # =========================
+        budget = extract_budget(message)
+
+        if budget:
+            items, total = get_products_for_budget(budget)
+
+            if items:
+                response = {
+                    "mode": "budget",
+                    "message": f"🎯 Подбор на {budget}₽ (~{total}₽)",
+                    "items": items
+                }
+            else:
+                response = {
+                    "reply": "😔 Не удалось подобрать товары под бюджет"
+                }
+
+            save_chat(request, message, response)
+            return JsonResponse(response)
+
+        # =========================
+        # 🎁 2. ПОДАРОК
+        # =========================
+        if "подар" in message.lower():
+            items = get_gift_set()
+
+            if items:
+                response = {
+                    "mode": "gift",
+                    "message": "🎁 Подарочный набор:",
+                    "items": items
+                }
+            else:
+                response = {
+                    "reply": "😔 Нет готовых подарочных наборов"
+                }
+
+            save_chat(request, message, response)
+            return JsonResponse(response)
+
+        # =========================
+        # 🛒 3. СБОР ИЗ ТЕКСТА
+        # =========================
+        items = find_products_by_text(message)
+
+        if items:
+            response = {
+                "mode": "cart_builder",
+                "message": "🛒 Нашёл товары:",
+                "items": items
+            }
+
+            save_chat(request, message, response)
+            return JsonResponse(response)
+
+        # =========================
+        # 🤖 4. GIGACHAT (fallback)
+        # =========================
+        reply = ask_gigachat(message)
+
+        response = {
+            "reply": reply or "🤖 Не смог ответить"
+        }
+
+        save_chat(request, message, response)
+        return JsonResponse(response)
+
+    except Exception as e:
+        print("💥 AI CHAT ERROR:")
+        traceback.print_exc()
+
+        return JsonResponse({
+            "reply": "❌ Ошибка сервера. Попробуй позже."
+        }, status=500)
+
+def save_chat(request, message, response):
+    """
+    Сохраняет историю чата (и текст, и JSON)
+    """
+
+    if not request.user.is_authenticated:
+        return
+
+    try:
+        ChatMessage.objects.create(
+            user=request.user,
+            message=message,
+
+            # если обычный ответ
+            reply_text=response.get("reply"),
+
+            # если есть режим (товары, бюджет и т.д.)
+            reply_json=response if "mode" in response else None
+        )
+
+    except Exception as e:
+        print("CHAT SAVE ERROR:", e)
+
+# ================= ADD TO CART =================
+@csrf_exempt
+@require_POST
+def ai_add_to_cart(request):
+    try:
+        data = json.loads(request.body)
+        slug = data.get("slug")
+
+        product = Product.objects.filter(slug=slug, available=True).first()
+
+        if not product:
+            return JsonResponse({"error": "Нет товара"}, status=404)
+
+        cart = Cart(request)
+
+        current = cart.get_product_quantity(product)
+
+        if current >= product.stock:
+            return JsonResponse({"error": "Нет в наличии"}, status=400)
+
+        if current + 1 > 10:
+            return JsonResponse({"error": "Лимит 10"}, status=400)
+
+        cart.add(product, quantity=1)
+
+        return JsonResponse({
+            "success": True,
+            "cart_count": len(cart),
+            "cart_total": float(cart.get_total_price())
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+# ================= BULK ADD =================
+@csrf_exempt
+@require_POST
+def ai_bulk_add_to_cart(request):
+    try:
+        data = json.loads(request.body)
+        items = data.get("items", [])
+
+        cart = Cart(request)
+
+        added = []
+        errors = []
+
+        for item in items:
+            slug = item.get("slug")
+            qty = int(item.get("quantity", 1))
+
+            product = Product.objects.filter(slug=slug, available=True).first()
+
+            if not product:
+                errors.append(slug)
+                continue
+
+            current = cart.get_product_quantity(product)
+
+            if current + qty > product.stock:
+                errors.append(product.name)
+                continue
+
+            cart.add(product, quantity=qty)
+
+            added.append(product.name)
+
+        return JsonResponse({
+            "success": True,
+            "added": added,
+            "errors": errors,
+            "cart_count": len(cart),
+            "cart_total": float(cart.get_total_price())
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

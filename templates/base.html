@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="ru" class="scroll-smooth">
 <head>
-  
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>SweetLand</title>
@@ -9,18 +8,28 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
     body { background: #FFFDF5; color: #4A4A4A; font-family: 'Nunito', sans-serif; }
-  </style>
-  <style>
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .fade-in { animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .typing span { animation: blink 1.2s infinite; }
+    .typing span:nth-child(2) { animation-delay: .2s }
+    .typing span:nth-child(3) { animation-delay: .4s }
+    @keyframes blink {
+      0%, 80%, 100% { opacity: 0 }
+      40% { opacity: 1 }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
+
+  <!-- HEADER (полностью ваш) -->
   <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-pink-100">
     <div class="container mx-auto px-4 py-3 flex items-center justify-between">
       <a href="{% url 'home' %}" class="flex items-center gap-3 group">
@@ -39,69 +48,49 @@
         <a href="{% url 'store:contacts' %}" class="font-semibold hover:text-pink-500 transition">Контакты</a>
 
         {% if user.is_authenticated %}
-
           {% if user.is_staff %}
             <a href="{% url 'orders:courier_orders' %}" class="font-semibold hover:text-pink-500 transition">Доставка</a>
           {% endif %}
           {% if user.is_authenticated and user.is_superuser %}
-            <a href="{% url 'users:admin_dashboard' %}" class="text-red-600 font-bold">
-              Админ
-            </a>
+            <a href="{% url 'users:admin_dashboard' %}" class="text-red-600 font-bold">Админ</a>
           {% endif %}
-
-
           <div class="relative group hidden sm:block">
-            <a href="{% url 'users:profile' %}"
-              class="font-semibold hover:text-pink-500 flex items-center gap-1">
-              Кабинет
-            </a>
-
+            <a href="{% url 'users:profile' %}" class="font-semibold hover:text-pink-500 flex items-center gap-1">Кабинет</a>
             <div class="absolute right-0 hidden group-hover:block pt-2">
               <div class="bg-white shadow-xl rounded-xl border border-gray-100 p-2 w-48">
-                <a href="{% url 'users:profile' %}"
-                  class="block px-4 py-2 hover:bg-pink-50 rounded-lg text-sm">
-                  Профиль
-                </a>
+                <a href="{% url 'users:profile' %}" class="block px-4 py-2 hover:bg-pink-50 rounded-lg text-sm">Профиль</a>
                 <form action="{% url 'users:logout' %}" method="post">
                   {% csrf_token %}
-                  <button class="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm">
-                    Выйти
-                  </button>
+                  <button class="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm">Выйти</button>
                 </form>
               </div>
             </div>
           </div>
-
         {% else %}
           <a href="{% url 'users:login' %}" class="hidden sm:inline-block font-semibold">Войти</a>
-          <a href="{% url 'users:register' %}"
-            class="hidden sm:inline-block bg-pink-500 text-white px-4 py-2 rounded-xl
-                    font-semibold hover:bg-pink-600 transition">
-            Регистрация
-          </a>
+          <a href="{% url 'users:register' %}" class="hidden sm:inline-block bg-pink-500 text-white px-4 py-2 rounded-xl font-semibold hover:bg-pink-600 transition">Регистрация</a>
         {% endif %}
 
-        <a href="{% url 'cart:cart_detail' %}"
-          class="relative bg-pink-50 p-2 rounded-full hover:bg-pink-100 transition">
+        <a href="{% url 'cart:cart_detail' %}" class="relative bg-pink-50 p-2 rounded-full hover:bg-pink-100 transition">
           <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-width="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            <path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
           </svg>
           {% if cart_counter %}
-            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px]
-                        font-bold w-5 h-5 flex items-center justify-center rounded-full
-                        border-2 border-white">
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
               {{ cart_counter }}
             </span>
           {% endif %}
         </a>
       </nav>
-
     </div>
   </header>
 
-  <main class="container mx-auto px-4 py-8 flex-grow">{% block content %}{% endblock %}</main>
+  <!-- MAIN CONTENT -->
+  <main class="container mx-auto px-4 py-8 flex-grow">
+    {% block content %}{% endblock %}
+  </main>
 
+  <!-- FOOTER (ваш) -->
   <footer class="bg-white border-t border-pink-100">
     <div class="container mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-10">
       <div>
@@ -126,5 +115,349 @@
     </div>
     <div class="border-t border-gray-50 py-6 text-center text-sm text-gray-400">© {{ now|date:"Y" }} SweetLand.</div>
   </footer>
+
+  <!-- ================= AI CHAT (расширенный) ================= -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <button onclick="toggleChat()"
+            class="bg-gradient-to-r from-pink-500 to-rose-400 text-white w-14 h-14 rounded-full shadow-xl text-2xl hover:scale-110 transition">
+      🤖
+    </button>
+
+    <div id="chat"
+         class="hidden mt-4 w-96 bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-pink-100">
+      <div class="bg-gradient-to-r from-pink-500 to-rose-400 text-white p-4 font-bold flex justify-between items-center">
+        <span>Sweet AI Pro 🍭</span>
+        <button onclick="toggleChat()">✖</button>
+      </div>
+      <div id="messages"
+           class="p-4 h-96 overflow-y-auto space-y-3 text-sm scrollbar-hide bg-gradient-to-b from-white to-pink-50">
+      </div>
+      <div class="p-3 border-t flex gap-2 bg-white">
+        <input id="input"
+               type="text"
+               placeholder="Спроси про товары, бюджет, подбор..."
+               class="flex-1 border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-200">
+        <button onclick="sendMessage()"
+                class="bg-pink-500 text-white px-4 rounded-xl hover:bg-pink-600">
+          ➤
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Глобальная переменная для хранения последней AI-подборки
+    let lastSuggestedItems = [];
+
+    function toggleChat() {
+      document.getElementById("chat").classList.toggle("hidden");
+    }
+
+    // Добавление сообщения (текстового или с кнопками)
+    function addMessage(text, user = false, product = null) {
+      const box = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = "fade-in";
+
+      let html = `
+        <div class="${user ? 'ml-auto bg-pink-500 text-white' : 'bg-white border'}
+             px-4 py-2 rounded-2xl max-w-[85%] shadow-sm">
+          ${text}
+      `;
+
+      if (product && product.slug) {
+        html += `
+          <div class="mt-2">
+            <button onclick="addToCart('${product.slug}')"
+              class="bg-green-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-green-600">
+              🛒 Добавить в корзину
+            </button>
+          </div>
+        `;
+      }
+
+      html += `</div>`;
+      div.innerHTML = html;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // Добавление сообщения со списком товаров и кнопкой "Добавить всё"
+    function addSuggestionMessage(items, message, mode) {
+      const box = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = "fade-in bg-white border px-4 py-2 rounded-2xl max-w-[85%] shadow-sm";
+
+      let html = `<div><strong>${message || 'AI подборка'}</strong></div><ul class="mt-1 space-y-1">`;
+      items.forEach(item => {
+        html += `<li class="text-xs">• ${item.name} – ${item.price}₽ x ${item.quantity || 1} шт.</li>`;
+      });
+      html += `</ul>`;
+
+      // Кнопка "Добавить всё в корзину"
+      if (items.length > 0) {
+        html += `
+          <div class="mt-3 flex gap-2">
+            <button onclick="addAllSuggested()"
+              class="bg-pink-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-pink-600">
+              🛒 Добавить всё (${items.length} поз.)
+            </button>
+          </div>
+        `;
+      }
+
+      div.innerHTML = html;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // Индикатор набора
+    function typing() {
+      const box = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.id = "typing";
+      div.innerHTML = `
+        <div class="bg-white border px-4 py-2 rounded-2xl inline-block typing">
+          <span>.</span><span>.</span><span>.</span>
+        </div>
+      `;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function removeTyping() {
+      const t = document.getElementById("typing");
+      if (t) t.remove();
+    }
+
+    // Парсинг ответа: вдруг там остались обычные [ADD_TO_CART]
+    function parsePlainAddToCart(text) {
+      const match = text.match(/\[ADD_TO_CART:([^\]]+)\]/);
+      if (match) {
+        return {
+          text: text.replace(/\[ADD_TO_CART:[^\]]+\]/g, ''),
+          slug: match[1].trim()
+        };
+      }
+      return { text, slug: null };
+    }
+
+    // Обработка ответа от сервера
+    async function handleAIResponse(data) {
+      // Если сервер вернул структурированный ответ (mode + items)
+      if (data.mode && data.items && data.items.length > 0) {
+        lastSuggestedItems = data.items;
+        addSuggestionMessage(data.items, data.message || 'Вот подходящие товары:', data.mode);
+        return;
+      }
+
+      // Обычный текстовый ответ
+      const reply = data.reply || '⚠️ Пустой ответ';
+      const parsed = parsePlainAddToCart(reply);
+      if (parsed.slug) {
+        addMessage(parsed.text, false, { slug: parsed.slug });
+      } else {
+        addMessage(reply);
+      }
+    }
+
+    // Отправка сообщения
+    function sendMessage() {
+      const input = document.getElementById("input");
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage(text, true);
+      input.value = "";
+      typing();
+
+      fetch("/ai/chat/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      })
+      .then(async res => {
+        removeTyping();
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("AI RESPONSE:", data);
+        handleAIResponse(data);
+        // Очищаем lastSuggestedItems, если ответ не содержит новый набор
+        // (чтобы не добавлять старый список по ошибке)
+        if (!data.items || !data.items.length) {
+          lastSuggestedItems = [];
+        }
+      })
+      .catch(err => {
+        console.error("FETCH ERROR:", err);
+        removeTyping();
+        addMessage("❌ Ошибка соединения с сервером");
+        lastSuggestedItems = [];
+      });
+    }
+
+    // Добавление одного товара (из кнопки)
+    function addToCart(slug) {
+      if (!slug) return;
+      fetch("/ai/add-to-cart/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ slug: slug })
+      })
+      .then(async r => {
+        if (!r.ok) {
+          const err = await r.json();
+          throw new Error(err.error || 'Ошибка');
+        }
+        return r.json();
+      })
+      .then(data => {
+        console.log("CART RESPONSE:", data);
+        addMessage(data.success ? "✅ Добавлено в корзину!" : "⚠️ Не удалось добавить");
+        if (data.cart_count) updateCartCounter(data.cart_count);
+      })
+      .catch(err => {
+        console.error("CART ERROR:", err);
+        addMessage("❌ " + (err.message || "Ошибка добавления"));
+      });
+    }
+
+    // Добавление всех предложенных товаров
+    function addAllSuggested() {
+      if (!lastSuggestedItems.length) {
+        addMessage("Нет товаров для добавления");
+        return;
+      }
+
+      const itemsPayload = lastSuggestedItems.map(item => ({
+        slug: item.slug,
+        quantity: item.quantity || 1
+      }));
+
+      fetch("/ai/bulk-add-to-cart/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ items: itemsPayload })
+      })
+      .then(async r => {
+        if (!r.ok) {
+          const err = await r.json();
+          throw new Error(err.error || 'Ошибка массового добавления');
+        }
+        return r.json();
+      })
+      .then(data => {
+        console.log("BULK ADD RESPONSE:", data);
+        if (data.success) {
+          addMessage(`✅ Добавлено ${data.added.length} товаров в корзину!`);
+        } else {
+          let msg = "⚠️ Частично добавлено:\n" + data.errors.join("\n");
+          if (data.added.length) msg += "\nУспешно добавлено: " + data.added.map(i => i.name).join(", ");
+          addMessage(msg);
+        }
+        if (data.cart_count) updateCartCounter(data.cart_count);
+        lastSuggestedItems = []; // очищаем после добавления
+      })
+      .catch(err => {
+        console.error("BULK ADD ERROR:", err);
+        addMessage("❌ " + (err.message || "Ошибка добавления"));
+      });
+    }
+
+    // Обновление счётчика корзины в шапке (опционально, если есть)
+    function updateCartCounter(count) {
+      const counterSpan = document.querySelector('header a[href*="cart"] span');
+      if (counterSpan) {
+        counterSpan.textContent = count;
+        counterSpan.style.display = count > 0 ? 'flex' : 'none';
+      }
+    }
+    function loadChatHistory() {
+
+      fetch("/ai/history/")
+        .then(res => res.json())
+        .then(data => {
+
+          const box = document.getElementById("messages");
+          box.innerHTML = "";
+
+          data.history.forEach(item => {
+
+            // 👤 пользователь
+            if(item.type === "user"){
+              addMessage(item.text, true);
+            }
+
+            // 🤖 обычный ответ
+            else if(item.type === "bot"){
+              addMessage(item.text);
+            }
+
+            // 🛒 структурированный (товары)
+            else if(item.type === "structured"){
+              handleAIResponse(item.data);
+            }
+
+          });
+
+        })
+        .catch(err => {
+          console.error("HISTORY ERROR:", err);
+        });
+    }
+    function toggleChat() {
+      const chat = document.getElementById("chat");
+      chat.classList.toggle("hidden");
+
+      if (!chat.classList.contains("hidden")) {
+        loadChatHistory(); // 🔥 загрузка истории
+      }
+    }
+    // Получение CSRF-токена
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    function clearChat(){
+      fetch("/ai/clear/", {
+        method:"POST",
+        headers:{
+          "X-CSRFToken": getCookie("csrftoken")
+        }
+      })
+      .then(()=> {
+        document.getElementById("messages").innerHTML = "";
+      });
+    }
+
+    // Отправка по Enter
+    document.getElementById("input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
 </body>
 </html>
