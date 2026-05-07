@@ -5,6 +5,8 @@
 
   {% if cart %}
   <div class="grid lg:grid-cols-3 gap-8">
+    
+    <!-- ITEMS -->
     <div class="lg:col-span-2 space-y-4">
       {% for item in cart %}
       <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition duration-300">
@@ -74,6 +76,7 @@
     <!-- SIDEBAR -->
     <aside class="lg:col-span-1">
       <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 sticky top-24">
+        
         <h3 class="text-lg font-bold mb-4 text-gray-700">Сумма заказа</h3>
 
         <div class="flex justify-between items-end mb-6">
@@ -83,22 +86,49 @@
           </span>
         </div>
 
+        <!-- CHECKOUT -->
         <a href="{% url 'orders:checkout' %}"
            class="block w-full text-center bg-gray-900 text-white py-4 rounded-2xl font-bold
                   hover:bg-pink-500 shadow-xl shadow-pink-100 transition-all">
           Оформить заказ
         </a>
 
+        <!-- CLEAR CART BLOCK -->
+        <div class="mt-6 pt-6 border-t border-gray-100">
+          <p class="text-xs text-gray-400 mb-3 text-center">
+            Нужно начать заново?
+          </p>
+
+          <form action="{% url 'cart:cart_clear' %}" method="post">
+            {% csrf_token %}
+            <button type="submit"
+                    onclick="return confirm('Очистить всю корзину?')"
+                    class="w-full flex items-center justify-center gap-2
+                          py-3 rounded-2xl font-bold
+                          bg-red-50 text-red-500
+                          hover:bg-red-100
+                          transition-all duration-200">
+              
+              <span class="text-lg">🗑️</span>
+              Очистить корзину
+            </button>
+          </form>
+        </div>
+
+        <!-- CONTINUE SHOPPING -->
         <a href="{% url 'store:product_list' %}"
            class="block text-center mt-4 text-xs font-bold text-gray-400
                   hover:text-gray-600 uppercase tracking-widest transition">
           Продолжить покупки
         </a>
+
       </div>
     </aside>
+
   </div>
 
   {% else %}
+  <!-- EMPTY CART -->
   <div class="text-center py-20 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
     <div class="text-7xl mb-6">🛒</div>
     <h3 class="text-2xl font-black text-gray-800 mb-2">Корзина пуста</h3>

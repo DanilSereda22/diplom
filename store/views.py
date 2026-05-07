@@ -54,14 +54,18 @@ def about_page(request):
         'reviews': reviews
     })
 
+# HOME
 def home(request):
-    sections = HomeSection.objects.filter(is_active=True).prefetch_related(
-        "products"
-    )
+    sections = HomeSection.objects.filter(
+        is_active=True
+    ).prefetch_related("products")
+
     return render(request, "pages/home.html", {
         "sections": sections
     })
 
+
+# SECTION DETAIL
 def section_detail(request, slug):
     section = get_object_or_404(
         HomeSection.objects.prefetch_related("products"),
@@ -70,13 +74,8 @@ def section_detail(request, slug):
     )
 
     products = section.products.filter(
-    ).annotate(
-        in_stock_order=Case(
-            When(stock__lte=0, then=1),
-            default=0,
-            output_field=IntegerField()
-        )
-    ).order_by("in_stock_order", "id")
+        stock__gt=0
+    ).order_by("id")
 
     return render(request, "pages/section_detail.html", {
         "section": section,
@@ -89,23 +88,22 @@ def product_list(request):
     form = SearchForm(request.GET or None)
 
     products = Product.objects.filter(
-    ).annotate(
-        in_stock_order=Case(
-            When(stock__lte=0, then=1),
-            default=0,
-            output_field=IntegerField()
-        )
-    ).order_by("in_stock_order", "id")
+        stock__gt=0
+    ).order_by("id")
 
     if form.is_valid():
         q = form.cleaned_data.get("q")
+
         if q:
             products = products.filter(
-                Q(name__icontains=q) | Q(description__icontains=q)
+                Q(name__icontains=q) |
+                Q(description__icontains=q)
             )
 
     paginator = Paginator(products, 12)
+
     page = request.GET.get("page")
+
     products = paginator.get_page(page)
 
     return render(request, "store/product_list.html", {
@@ -117,7 +115,7 @@ def product_list(request):
 # PRODUCT DETAIL
 def product_detail(request, slug):
     product = get_object_or_404(
-        Product.objects.all(),
+        Product.objects.filter(stock__gt=0),
         Q(slug__iexact=slug)
     )
 
@@ -129,44 +127,48 @@ def product_detail(request, slug):
 # CATEGORY
 def category_view(request, slug):
     category = get_object_or_404(Category, slug=slug)
-    subcategories = category.subcategories.all()
+
+    subcategories = category.subcategories.annotate(
+        available_products_count=Count(
+            "products",
+            filter=Q(products__stock__gt=0)
+        )
+    )
 
     products = Product.objects.filter(
         category__in=subcategories,
-    ).annotate(
-        in_stock_order=Case(
-            When(stock__lte=0, then=1),
-            default=0,
-            output_field=IntegerField()
-        )
-    ).order_by("in_stock_order", "id")
+        stock__gt=0
+    )
 
     return render(request, "store/category.html", {
         "category": category,
-        "products": products,
         "subcategories": subcategories,
+        "products": products,
     })
-
 
 # SUBCATEGORY
 def subcategory_view(request, slug):
     subcategory = get_object_or_404(SubCategory, slug=slug)
 
+    subcategories = SubCategory.objects.filter(
+        category=subcategory.category
+    ).annotate(
+        available_products_count=Count(
+            "products",
+            filter=Q(products__stock__gt=0)
+        )
+    )
+
     products = Product.objects.filter(
         category=subcategory,
-    ).annotate(
-        in_stock_order=Case(
-            When(stock__lte=0, then=1),
-            default=0,
-            output_field=IntegerField()
-        )
-    ).order_by("in_stock_order", "id")
+        stock__gt=0
+    )
 
     return render(request, "store/subcategory.html", {
         "subcategory": subcategory,
+        "subcategories": subcategories,
         "products": products,
     })
-
 def faq(request):
     return render(request, "pages/faq.html")
 

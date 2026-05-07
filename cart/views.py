@@ -118,3 +118,18 @@ def checkout(request):
         return redirect("orders:order_success", order_id=order.id)
 
     return render(request, "cart/checkout.html", {"cart": cart, "user": user})
+
+@require_POST
+def cart_clear(request):
+    cart = Cart(request)
+    cart.clear()
+
+    # Поддержка AJAX (в твоём стиле)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'cart_total_quantity': 0,
+            'cart_total_price': 0,
+        })
+
+    messages.success(request, "Корзина очищена 🗑️")
+    return redirect("cart:cart_detail")

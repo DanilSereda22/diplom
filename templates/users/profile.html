@@ -12,7 +12,7 @@
 
       {% if user.avatar %}
         <img src="{{ user.avatar.url }}"
-             class="w-full h-full object-cover group-hover:opacity-70 transition">
+             class="w-full h-full object-cover group-hover:opacity-70 transition avatar-preview">
       {% else %}
         <div class="w-full h-full flex items-center justify-center text-xl font-bold text-gray-700 group-hover:opacity-70">
           {{ user.first_name|first|default:user.username|first|upper }}
@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <div class="grid md:grid-cols-3 gap-8">
+  <div class="grid md:grid-cols-3 gap-8 items-start">
 
     <!-- PROFILE -->
     <form method="post" enctype="multipart/form-data"
@@ -182,9 +182,14 @@ document.getElementById("phone")?.addEventListener("input", e => {
 <script>
 const avatarInput = document.getElementById("avatarInput");
 
-avatarInput?.addEventListener("change", () => {
-    if (avatarInput.files.length > 0) {
-        avatarInput.closest("form").submit();
+avatarInput?.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const img = document.querySelector(".avatar-preview");
+
+    if (img) {
+        img.src = URL.createObjectURL(file);
     }
 });
 </script>

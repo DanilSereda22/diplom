@@ -27,18 +27,25 @@
       </h3>
 
       <ul class="space-y-1">
-        {% for sub in category.subcategories.all %}
+        {% for sub in subcategories %}
         <li>
           <a href="{{ sub.get_absolute_url }}" 
-             class="flex items-center justify-between px-4 py-3 rounded-2xl text-gray-600 hover:bg-white hover:text-pink-600 transition group border border-transparent">
-            <span class="text-sm font-bold">{{ sub.name }}</span>
-            <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-400 group-hover:bg-pink-100 group-hover:text-pink-500 transition-colors">
-              {{ sub.products.count }}
+            class="flex items-center justify-between px-4 py-3 rounded-2xl text-gray-600 hover:bg-white hover:text-pink-600 transition group border border-transparent">
+
+            <span class="text-sm font-bold">
+              {{ sub.name }}
             </span>
+
+            <span class="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-400 group-hover:bg-pink-100 group-hover:text-pink-500 transition-colors">
+              {{ sub.available_products_count }}
+            </span>
+
           </a>
         </li>
         {% empty %}
-          <li class="text-sm text-gray-400 italic px-4">Разделов пока нет</li>
+          <li class="text-sm text-gray-400 italic px-4">
+            Разделов пока нет
+          </li>
         {% endfor %}
       </ul>
     </div>

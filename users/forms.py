@@ -1,4 +1,3 @@
-# users/forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
 from django.contrib.auth import get_user_model
@@ -15,15 +14,17 @@ class CustomPasswordResetForm(PasswordResetForm):
             )
         return email
 
+
 class RegisterForm(UserCreationForm):
+    # ❌ убираем лишние поля
     email = forms.EmailField(required=True)
-    phone = forms.CharField(required=False, max_length=30)
-    address = forms.CharField(
-        required=False,
-        max_length=255,
-        widget=forms.TextInput(attrs={"placeholder": "Адрес доставки"}),
-    )
-    
+    # phone = forms.CharField(required=False, max_length=30)
+    # address = forms.CharField(
+    #     required=False,
+    #     max_length=255,
+    #     widget=forms.TextInput(attrs={"placeholder": "Адрес доставки"}),
+    # )
+
     class Meta:
         model = CustomUser
         fields = (
@@ -31,8 +32,8 @@ class RegisterForm(UserCreationForm):
             "first_name",
             "last_name",
             "email",
-            "phone",
-            "address",
+            # "phone",
+            # "address",
             "password1",
             "password2",
         )
@@ -46,8 +47,11 @@ class RegisterForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.phone = self.cleaned_data.get("phone")
-        user.address = self.cleaned_data.get("address")
+
+        # ❌ больше не используем
+        # user.phone = self.cleaned_data.get("phone")
+        # user.address = self.cleaned_data.get("address")
+
         if commit:
             user.save()
         return user

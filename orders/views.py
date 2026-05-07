@@ -152,12 +152,24 @@ def admin_delete_order(request, order_id):
 def admin_edit_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     products = Product.objects.filter(available=True)
+
     if request.method == "POST":
-        for field in ["first_name", "last_name", "email", "phone",
-                      "delivery_method", "delivery_address", "delivery_comment", "status"]:
+        for field in [
+            "first_name", "last_name", "email", "phone",
+            "delivery_method", "delivery_address",
+            "delivery_comment", "status"
+        ]:
             setattr(order, field, request.POST.get(field))
+
         order.save()
-    return render(request, "orders/admin_edit_order.html", {"order": order, "products": products})
+
+        # ✅ ВАЖНО: редирект после сохранения
+        return redirect("orders:admin_orders")
+
+    return render(request, "orders/admin_edit_order.html", {
+        "order": order,
+        "products": products
+    })
 
 
 @user_passes_test(is_admin)

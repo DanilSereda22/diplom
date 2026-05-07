@@ -10,7 +10,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ("Дополнительно", {"fields": ("phone", "address")}),
     )
-
+    
     list_display = (
         "username",
         "email",
