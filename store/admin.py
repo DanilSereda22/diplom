@@ -36,7 +36,18 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "price","stock", "available", "created")
-    list_filter = ("available", "category")
+    list_display = (
+        "name",
+        "category",
+        "price",
+        "discount_percent",
+        "final_price",
+        "stock",
+        "available",
+        "created",
+    )
+
+    list_filter = ("available", "category", "discount_percent")
     search_fields = ("name", "description")
     prepopulated_fields = {"slug": ("name",)}
+    list_editable = ("price", "discount_percent", "stock", "available")

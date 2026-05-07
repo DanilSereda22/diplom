@@ -67,6 +67,15 @@
         {% if not product.is_out_of_stock %}
         <div class="group bg-white rounded-[2.5rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-pink-200 hover:-translate-y-1 overflow-hidden flex flex-col h-full relative">
           
+          <!-- Стикер скидки -->
+          {% if product.is_discount %}
+          <div class="absolute top-6 left-6 z-20">
+              <span class="bg-red-500 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg shadow-red-100 uppercase tracking-tighter">
+                  -{{ product.discount_percent }}%
+              </span>
+          </div>
+          {% endif %}
+
           <a href="{{ product.get_absolute_url }}" class="flex flex-col p-4 pb-0 flex-grow">
             <div class="relative aspect-square w-full bg-white rounded-[2rem] mb-4 flex items-center justify-center overflow-hidden shrink-0 border border-gray-50">
               {% if product.image %}
@@ -86,9 +95,18 @@
           <div class="p-5 pt-2 mt-auto flex items-center justify-between z-10 w-full border-t border-gray-50 bg-gray-50/30">
             <div class="flex flex-col">
                 <span class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Цена</span>
-                <span class="text-lg font-black text-gray-900 leading-none">
-                    <span id="prod-price-{{ product.id }}">{{ product.price }}</span>&nbsp;₽
-                </span>
+                <div class="flex flex-col">
+                    {% if product.is_discount %}
+                        <span class="text-[10px] text-gray-400 line-through leading-none mb-1">{{ product.old_price }}&nbsp;₽</span>
+                        <span class="text-lg font-black text-pink-600 leading-none">
+                            <span id="prod-price-{{ product.id }}">{{ product.final_price }}</span>&nbsp;₽
+                        </span>
+                    {% else %}
+                        <span class="text-lg font-black text-gray-900 leading-none">
+                            <span id="prod-price-{{ product.id }}">{{ product.price }}</span>&nbsp;₽
+                        </span>
+                    {% endif %}
+                </div>
             </div>
             
             <button type="button" 
@@ -127,7 +145,11 @@
           <h3 id="modal-title" class="text-xl font-bold text-gray-800 leading-tight mb-4"></h3>
           
           <div class="flex flex-col md:flex-row md:items-center gap-6 justify-center md:justify-start">
-            <span class="text-3xl font-black text-gray-900"><span id="modal-price"></span>&nbsp;₽</span>
+            <div class="flex flex-col">
+                <!-- Контейнер для скидки в модалке -->
+                <span id="modal-old-price-container" class="text-sm text-gray-400 line-through hidden"></span>
+                <span class="text-3xl font-black text-gray-900"><span id="modal-price"></span>&nbsp;₽</span>
+            </div>
             
             <div class="flex items-center gap-2 bg-pink-50 p-2 rounded-2xl w-fit mx-auto md:mx-0 border border-pink-100">
               <button onclick="changeModalQty(-1)" class="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center font-bold text-pink-500 hover:bg-pink-500 hover:text-white transition-all">-</button>
@@ -136,7 +158,6 @@
             </div>
           </div>
           
-          <!-- Сокращенный текст ошибки -->
           <p id="stock-warning" class="text-red-500 text-[11px] font-bold mt-4 hidden uppercase tracking-widest bg-red-50 py-1.5 px-4 rounded-full w-fit mx-auto md:mx-0 border border-red-100">
             Максимум в наличии
           </p>
@@ -155,7 +176,6 @@
         </div>
 
         <div class="flex gap-3 w-full md:w-auto">
-          <!-- Кнопка "Продолжить покупки" -->
           <button onclick="closeModal()" class="flex-1 md:flex-none px-6 py-4 rounded-2xl bg-gray-100 text-gray-500 font-bold hover:bg-gray-200 transition-all text-[10px] uppercase tracking-widest">
             Продолжить покупки
           </button>
@@ -174,16 +194,31 @@ let currentProductId = null, currentMaxStock = 0, currentPrice = 0;
 function openQuickAdd(id, stock) {
     currentProductId = id;
     currentMaxStock = parseInt(stock);
+    
+    // Получаем данные
     const name = document.getElementById(`prod-name-${id}`).innerText;
-    const price = parseFloat(document.getElementById(`prod-price-${id}`).innerText.replace(/\s/g, '').replace(',', '.'));
+    const priceText = document.getElementById(`prod-price-${id}`).innerText;
+    const price = parseFloat(priceText.replace(/\s/g, '').replace(',', '.'));
     const img = document.getElementById(`prod-img-${id}`).src;
     currentPrice = price;
 
+    // Заполняем модалку
     document.getElementById('modal-title').innerText = name;
     document.getElementById('modal-price').innerText = price.toLocaleString();
     document.getElementById('modal-img').src = img;
     document.getElementById('modal-qty').value = 1;
     document.getElementById('stock-warning').classList.add('hidden');
+
+    // Логика отображения старой цены в модалке (если есть)
+    const oldPriceSpan = document.querySelector(`#prod-price-${id}`).closest('.flex-col').querySelector('.line-through');
+    const modalOldPriceCont = document.getElementById('modal-old-price-container');
+    
+    if (oldPriceSpan) {
+        modalOldPriceCont.innerText = oldPriceSpan.innerText;
+        modalOldPriceCont.classList.remove('hidden');
+    } else {
+        modalOldPriceCont.classList.add('hidden');
+    }
 
     sendToCart(id, 1, false);
     document.getElementById('quick-add-modal').classList.remove('hidden');

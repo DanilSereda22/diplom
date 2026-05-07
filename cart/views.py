@@ -13,14 +13,9 @@ def cart_detail(request):
 
 @require_POST
 def cart_add(request, product_pk):
-    """
-    Универсальная функция добавления/обновления товара.
-    Поддерживает обычный POST и AJAX (для модального окна).
-    """
     cart = Cart(request)
     product = get_object_or_404(Product, pk=product_pk, available=True)
     
-    # Получаем данные из запроса
     try:
         quantity = int(request.POST.get("quantity", 1))
     except ValueError:
@@ -29,24 +24,16 @@ def cart_add(request, product_pk):
     override = request.POST.get("override") == "true"
     current_qty = cart.get_product_quantity(product)
 
-    # Проверка лимитов товара как в cart.html
+    # Логика проверки остатков
     if override:
-        if quantity > product.stock:
-            quantity = product.stock
-            messages.error(request, f"Осталось только {product.stock} шт.")
+        if quantity > product.stock: quantity = product.stock
     else:
         if current_qty + quantity > product.stock:
             quantity = product.stock - current_qty
-            if quantity <= 0:
-                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                    return JsonResponse({'error': f'Больше нет в наличии (макс. {product.stock})'}, status=400)
-                messages.error(request, f"Осталось только {product.stock} шт.")
-                return redirect("cart:cart_detail")
 
-    # Добавляем в корзину
-    cart.add(product=product, quantity=quantity, override_quantity=override)
+    if quantity > 0 or override:
+        cart.add(product=product, quantity=quantity, override_quantity=override)
 
-    # Если это AJAX-запрос от нашего нового скрипта
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
             'status': 'success',
@@ -55,8 +42,46 @@ def cart_add(request, product_pk):
             'product_qty': cart.get_product_quantity(product),
         })
 
-    # Если обычный запрос через форму (например, в корзине)
     return redirect("cart:cart_detail")
+
+def checkout(request):
+    cart = Cart(request)
+    if cart.is_empty():
+        return redirect("store:home")
+
+    user = request.user if request.user.is_authenticated else None
+
+    if request.method == "POST":
+        total = cart.get_total_price()
+        
+        # Логика бонусов
+        used_bonus = Decimal(request.POST.get("use_bonus", 0))
+        if user and used_bonus > 0:
+            used_bonus = min(used_bonus, user.bonus_points, total * Decimal('0.5')) # Например, макс 50% бонусами
+            total -= used_bonus
+            user.bonus_points -= used_bonus
+            user.save()
+
+        # Создаем заказ
+        order = Order.objects.create(
+            user=user,
+            total_price=total,
+            status="processing"
+        )
+
+        # КЛЮЧЕВОЙ МОМЕНТ: Берем цену из 'item', так как там она со скидкой
+        for item in cart:
+            OrderItem.objects.create(
+                order=order,
+                product=item["product"],
+                quantity=item["quantity"],
+                price=item["price"]  # Это цена из корзины (уже со скидкой!)
+            )
+
+        cart.clear()
+        return redirect("orders:order_success", order_id=order.id)
+
+    return render(request, "cart/checkout.html", {"cart": cart, "user": user})
 
 def add_to_cart(request, product_id):
     """
@@ -78,46 +103,6 @@ def cart_remove(request, product_pk):
         })
         
     return redirect("cart:cart_detail")
-
-
-def checkout(request):
-    cart = Cart(request)
-    user = request.user if request.user.is_authenticated else None
-
-    if request.method == "POST":
-        used_bonus = Decimal(request.POST.get("use_bonus", 0))
-        total = cart.get_total_price()
-
-        # Списание бонусов
-        if user and used_bonus > 0:
-            used_bonus = min(used_bonus, user.bonus_points, total)
-            total -= used_bonus
-            user.bonus_points -= used_bonus
-            user.save()
-
-        # Создание заказа
-        order = Order.objects.create(
-            user=user,
-            total_price=total,
-            status="processing",
-            # ... остальные поля
-        )
-
-        # Добавление товаров в заказ
-        for item in cart:
-            OrderItem.objects.create(
-                order=order,
-                product=item["product"],
-                quantity=item["quantity"],
-                price=item["price"],
-            )
-
-        # Очистка корзины
-        cart.clear()
-
-        return redirect("orders:order_success", order_id=order.id)
-
-    return render(request, "cart/checkout.html", {"cart": cart, "user": user})
 
 @require_POST
 def cart_clear(request):

@@ -6,12 +6,10 @@
   {% if cart %}
   <div class="grid lg:grid-cols-3 gap-8">
     
-    <!-- ITEMS -->
     <div class="lg:col-span-2 space-y-4">
       {% for item in cart %}
       <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition duration-300">
 
-        <!-- IMAGE -->
         <div class="w-20 h-20 bg-gray-50 rounded-2xl shrink-0 flex items-center justify-center overflow-hidden">
           {% if item.product.image %}
             <img src="{{ item.product.image.url }}" class="w-full h-full object-contain p-1">
@@ -20,16 +18,24 @@
           {% endif %}
         </div>
 
-        <!-- INFO -->
         <div class="flex-grow">
           <a href="{{ item.product.get_absolute_url }}"
              class="font-bold text-gray-800 hover:text-pink-600 transition leading-tight block">
             {{ item.product.name }}
           </a>
 
-          <p class="text-xs text-gray-400 mt-1">
-            {{ item.price }}&nbsp;₽ / шт.
-          </p>
+          <div class="flex flex-col mt-1">
+            {% if item.product.is_discount %}
+              <span class="text-[10px] text-gray-400 line-through leading-none">{{ item.product.old_price }} ₽</span>
+              <p class="text-xs text-pink-600 font-bold">
+                {{ item.price }}&nbsp;₽ / шт.
+              </p>
+            {% else %}
+              <p class="text-xs text-gray-400">
+                {{ item.price }}&nbsp;₽ / шт.
+              </p>
+            {% endif %}
+          </div>
 
           {% if item.quantity >= item.product.stock %}
             <p class="text-xs text-red-500 font-bold mt-1">
@@ -38,7 +44,6 @@
           {% endif %}
         </div>
 
-        <!-- QUANTITY -->
         <form action="{% url 'cart:cart_add' item.product.pk %}" method="post">
           {% csrf_token %}
           <input type="hidden" name="override" value="true">
@@ -53,9 +58,8 @@
                         focus:ring-2 focus:ring-pink-200 outline-none transition">
         </form>
 
-        <!-- TOTAL -->
         <div class="text-right min-w-[70px]">
-          <p class="font-black text-gray-900">
+          <p class="font-black {% if item.product.is_discount %}text-pink-600{% else %}text-gray-900{% endif %}">
             {{ item.total_price }}&nbsp;₽
           </p>
 
@@ -73,7 +77,6 @@
       {% endfor %}
     </div>
 
-    <!-- SIDEBAR -->
     <aside class="lg:col-span-1">
       <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 sticky top-24">
         
@@ -81,19 +84,17 @@
 
         <div class="flex justify-between items-end mb-6">
           <span class="text-gray-400 font-medium">Итого:</span>
-          <span class="text-2xl font-black text-gray-900 leading-none">
+          <span class="text-2xl font-black text-pink-600 leading-none">
             {{ cart.get_total_price }}&nbsp;₽
           </span>
         </div>
 
-        <!-- CHECKOUT -->
         <a href="{% url 'orders:checkout' %}"
            class="block w-full text-center bg-gray-900 text-white py-4 rounded-2xl font-bold
                   hover:bg-pink-500 shadow-xl shadow-pink-100 transition-all">
           Оформить заказ
         </a>
 
-        <!-- CLEAR CART BLOCK -->
         <div class="mt-6 pt-6 border-t border-gray-100">
           <p class="text-xs text-gray-400 mb-3 text-center">
             Нужно начать заново?
@@ -115,7 +116,6 @@
           </form>
         </div>
 
-        <!-- CONTINUE SHOPPING -->
         <a href="{% url 'store:product_list' %}"
            class="block text-center mt-4 text-xs font-bold text-gray-400
                   hover:text-gray-600 uppercase tracking-widest transition">
@@ -128,7 +128,6 @@
   </div>
 
   {% else %}
-  <!-- EMPTY CART -->
   <div class="text-center py-20 bg-white rounded-[3rem] border border-gray-100 shadow-sm">
     <div class="text-7xl mb-6">🛒</div>
     <h3 class="text-2xl font-black text-gray-800 mb-2">Корзина пуста</h3>

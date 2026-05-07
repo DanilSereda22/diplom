@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.conf import settings
 from PIL import Image
 from django.contrib.auth.models import User
-
+from decimal import Decimal
 def product_image_upload_to(instance, filename):
     return f"products/{instance.category.slug if instance.category else 'misc'}/{filename}"
 
@@ -45,7 +45,7 @@ class SubCategory(models.Model):
 
 class Product(models.Model):
     name = models.CharField("Название", max_length=255)
-    slug = models.SlugField("Slug", max_length=255, unique=True, db_index=True)
+    slug = models.SlugField("Slug", max_length=255, unique=True)
 
     category = models.ForeignKey(
         "SubCategory",
@@ -54,48 +54,46 @@ class Product(models.Model):
     )
 
     description = models.TextField("Описание", blank=True)
+
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
-    stock = models.PositiveIntegerField("Количество на складе", default=0)
+    discount_percent = models.PositiveIntegerField("Скидка (%)", default=0)
+
+    stock = models.PositiveIntegerField("Количество", default=0)
     weight = models.PositiveIntegerField("Вес (г)", default=0)
+
     image = models.ImageField(upload_to="products/", blank=True, null=True)
+
     available = models.BooleanField("Доступен", default=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["id"]
+        ordering = ["-id"]
+        verbose_name = "Товар"
+        verbose_name_plural = "Товары"
 
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse("store:product_detail", args=[self.slug])
+    @property
+    def is_discount(self):
+        return self.discount_percent > 0
+
+    @property
+    def old_price(self):
+        return self.price
+
+    @property
+    def final_price(self):
+        if self.discount_percent:
+            return round(self.price * (100 - self.discount_percent) / 100, 2)
+        return self.price
 
     @property
     def is_out_of_stock(self):
         return self.stock <= 0 or not self.available
 
-    def save(self, *args, **kwargs):
-        if self.stock <= 0:
-            self.available = False
-
-        super().save(*args, **kwargs)
-
-        if self.image:
-            img = Image.open(self.image.path).convert("RGB")
-
-            width, height = img.size
-            min_side = min(width, height)
-
-            # Центрируем crop
-            left = (width - min_side) / 2
-            top = (height - min_side) / 2
-            right = (width + min_side) / 2
-            bottom = (height + min_side) / 2
-
-            img = img.crop((left, top, right, bottom))
-            img = img.resize((850, 850), Image.LANCZOS)
-
-            img.save(self.image.path, format="JPEG", quality=90)
+    def get_absolute_url(self):
+        return reverse("store:product_detail", args=[self.slug])
     
 class HomeSection(models.Model):
     title = models.CharField("Заголовок секции", max_length=120)

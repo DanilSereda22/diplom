@@ -7,6 +7,8 @@ from .models import Order, OrderItem
 from store.models import Product
 from .forms import CheckoutForm
 from cart.cart import Cart
+from django.views.decorators.http import require_POST
+from django.db import transaction
 
 def is_courier(user):
     return user.is_staff
@@ -105,6 +107,25 @@ def order_success_view(request, order_id):
         "order": order,
         "bonus_added": bonus_added
     })
+@login_required
+@require_POST
+def order_delete(request, order_id):
+    with transaction.atomic():
+        # Находим заказ (только статус processing, чтобы нельзя было удалить уже оплаченный)
+        order = get_object_or_404(Order, id=order_id, user=request.user, status='processing')
+        
+        # 1. ВОЗВРАТ БОНУСОВ (если они физически списались при создании заказа)
+        if order.bonus_used > 0:
+            user = request.user
+            user.bonus_points += order.bonus_used
+            user.save()
+        
+        # 2. ПРОСТО УДАЛЯЕМ ЗАКАЗ (склад не трогаем, так как списания не было)
+        order.delete()
+        
+        messages.success(request, "Заказ успешно отменен и удален.")
+            
+    return redirect('users:profile')
 
 # КУРЬЕР
 @login_required(login_url='users:login')

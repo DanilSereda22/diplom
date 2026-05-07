@@ -100,27 +100,43 @@
             </div>
             <div>
               <p class="font-bold text-gray-800 line-clamp-1">{{ item.product.name }}</p>
-              <p class="text-gray-400">Кол-во: {{ item.quantity }}</p>
+              <p class="text-[10px] text-gray-400">
+                Кол-во: {{ item.quantity }}
+                {% if item.product.is_discount %}
+                  <span class="ml-1 text-pink-500 font-bold">(скидка -{{ item.product.discount_percent }}%)</span>
+                {% endif %}
+              </p>
             </div>
           </div>
-          <span class="font-black text-gray-900 whitespace-nowrap">{{ item.total_price }}&nbsp;₽</span>
+          <div class="text-right flex flex-col">
+            {% if item.product.is_discount %}
+              <span class="text-[10px] text-gray-400 line-through leading-none">
+                {% widthratio item.product.old_price 1 item.quantity %}&nbsp;₽
+              </span>
+              <span class="font-black text-pink-600 whitespace-nowrap">{{ item.total_price }}&nbsp;₽</span>
+            {% else %}
+              <span class="font-black text-gray-900 whitespace-nowrap">{{ item.total_price }}&nbsp;₽</span>
+            {% endif %}
+          </div>
         </li>
         {% endfor %}
       </ul>
 
       <div class="border-t border-gray-200 pt-4 space-y-2">
         <div class="flex justify-between text-gray-500">
-          <span>Сумма:</span>
-          <span>{{ cart.get_total_price }}&nbsp;₽</span>
+          <span>Сумма товаров:</span>
+          <span class="font-bold text-gray-800">{{ cart.get_total_price }}&nbsp;₽</span>
         </div>
+        
         <div id="bonus-discount-row" class="flex justify-between text-pink-600 hidden">
           <span>Скидка бонусами:</span>
           <span id="bonus-amount">-0&nbsp;₽</span>
         </div>
-        <div class="flex justify-between items-end pt-2">
+
+        <div class="flex justify-between items-end pt-2 border-t border-gray-100 mt-2">
           <span class="text-gray-800 font-bold text-lg">Итого к оплате:</span>
           <div class="text-right">
-            <span class="text-2xl font-black text-gray-900" 
+            <span class="text-2xl font-black text-pink-600" 
                   id="total-price" 
                   data-original-total="{{ cart.get_total_price }}">
               {{ cart.get_total_price }}&nbsp;₽
@@ -134,13 +150,21 @@
 </div>
 
 <script>
-document.getElementById("phone")?.addEventListener("input", e => {
-  let v = e.target.value.replace(/\D/g,'').slice(1);
-  e.target.value = "+7 ("+v.slice(0,3)+(v[3]?") ":"")+
-                   v.slice(3,6)+(v[6]?"-":"")+
-                   v.slice(6,8)+(v[8]?"-":"")+
-                   v.slice(8,10);
-})
+// Маска для телефона
+document.getElementById("id_phone")?.addEventListener("input", e => {
+  let v = e.target.value.replace(/\D/g,'');
+  if (v.startsWith('7')) v = v.slice(1);
+  if (v.startsWith('8')) v = v.slice(1);
+  v = v.slice(0, 10);
+  
+  let res = "+7 ";
+  if (v.length > 0) res += "(" + v.slice(0, 3);
+  if (v.length > 3) res += ") " + v.slice(3, 6);
+  if (v.length > 6) res += "-" + v.slice(6, 8);
+  if (v.length > 8) res += "-" + v.slice(8, 10);
+  e.target.value = res;
+});
+
 document.addEventListener("DOMContentLoaded", function () {
   // 1. Управление полями доставки
   const deliverySelect = document.getElementById("id_delivery_method");
@@ -155,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
     deliverySelect.addEventListener("change", toggleDelivery);
-    toggleDelivery(); // Запуск при загрузке
+    toggleDelivery();
   }
 
   // 2. Управление бонусами и ценой
@@ -165,38 +189,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const bonusAmountDisplay = document.getElementById("bonus-amount");
 
   if (bonusInput && totalDisplay) {
-    // Получаем числа из data-атрибутов (гарантирует отсутствие ошибок парсинга текста)
     const originalTotal = parseFloat(totalDisplay.dataset.originalTotal.replace(',', '.')) || 0;
     const maxUserBonuses = parseFloat(bonusInput.dataset.maxBonus.replace(',', '.')) || 0;
 
     bonusInput.addEventListener("input", function() {
       let val = parseFloat(this.value) || 0;
 
-      // Валидация: не больше, чем есть у юзера
-      if (val > maxUserBonuses) {
-        val = maxUserBonuses;
-      }
+      if (val > maxUserBonuses) val = maxUserBonuses;
+      if (val > originalTotal) val = originalTotal;
+      if (val < 0) val = 0;
 
-      // Валидация: не больше, чем сумма заказа (чтобы цена не стала отрицательной)
-      if (val > originalTotal) {
-        val = originalTotal;
-      }
-
-      // Валидация: не меньше нуля
-      if (val < 0) {
-        val = 0;
-      }
-
-      // Обновляем значение в инпуте на исправленное
       this.value = val > 0 ? val : '';
 
-      // Считаем новую итоговую цену
       const newTotal = originalTotal - val;
 
-      // Обновляем основной ценник
       totalDisplay.innerHTML = `${new Intl.NumberFormat('ru-RU').format(Math.round(newTotal))}&nbsp;₽`;
 
-      // Показываем/скрываем строку скидки
       if (val > 0) {
         bonusRow.classList.remove("hidden");
         bonusAmountDisplay.innerHTML = `-${new Intl.NumberFormat('ru-RU').format(Math.round(val))}&nbsp;₽`;
@@ -209,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <style>
-  /* Дополнительные стили для полей Django, если они не стилизованы в forms.py */
   input[type="text"], input[type="email"], input[type="number"], select, textarea {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -220,8 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   input:focus, select:focus {
     border-color: #ec4899;
-    ring: 2px;
-    ring-color: #fce7f3;
+    box-shadow: 0 0 0 3px rgba(252, 231, 243, 0.5);
   }
 </style>
 {% endblock %}
