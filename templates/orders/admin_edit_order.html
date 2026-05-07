@@ -116,41 +116,56 @@
   </div>
 
   <!-- ADD PRODUCT -->
-  <form method="post"
-        action="{% url 'orders:admin_add_item' order.id %}"
-        class="bg-white border rounded-3xl p-6 space-y-4">
-    {% csrf_token %}
+  <form method="post" 
+        action="{% url 'orders:admin_add_item' order.id %}" 
+        class="bg-white border rounded-3xl p-6 space-y-4 shadow-sm">
+      {% csrf_token %}
 
-    <h2 class="text-xl font-bold">Добавить товар</h2>
+      <h2 class="text-xl font-bold">Добавить товар</h2>
 
-    <div class="flex gap-4">
-      <select name="product_id" class="input flex-1">
-        {% for product in products %}
-          <option value="{{ product.id }}">
-            {{ product.name }} ({{ product.price }} ₽)
-          </option>
-        {% endfor %}
-      </select>
+      <div class="flex gap-2">
+          <select name="product_id" class="input flex-1 truncate">
+              {% for product in products %}
+                  <option value="{{ product.id }}">
+                      {{ product.name }} — 
+                      {% if product.discount_percent > 0 %}
+                          {{ product.final_price|floatformat:0 }} ₽ (скидка {{ product.discount_percent }}%)
+                      {% else %}
+                          {{ product.price|floatformat:0 }} ₽
+                      {% endif %}
+                  </option>
+              {% endfor %}
+          </select>
 
-      <input type="number" name="quantity" value="1" min="1" class="w-24 input">
+          <div class="w-16">
+              <input type="number" name="quantity" value="1" min="1" 
+                    class="input text-center font-bold" placeholder="К-во">
+          </div>
 
-      <button class="px-5 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700">
-        Добавить
-      </button>
-    </div>
+          <button class="px-5 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition active:scale-95">
+              Добавить
+          </button>
+      </div>
   </form>
+
+  <style>
+  .input {
+      width: 100%;
+      padding: .5rem;
+      border-radius: .75rem;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+  }
+  /* Чтобы длинные названия не раздували селект */
+  .truncate {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+  </style>
 
 </div>
 
-<style>
-.input{
-  width:100%;
-  padding:.5rem;
-  border-radius:.75rem;
-  border:1px solid #e5e7eb;
-  background:#f9fafb;
-}
-</style>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const input = document.querySelector('input[name="phone"]');

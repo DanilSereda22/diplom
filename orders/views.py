@@ -209,10 +209,24 @@ def admin_delete_item(request, item_id):
     return redirect("orders:admin_edit_order", order_id)
 
 
-@user_passes_test(is_admin)
+@user_passes_test(lambda u: u.is_staff)
 def admin_add_item(request, order_id):
-    order = get_object_or_404(Order, id=order_id)
-    product = get_object_or_404(Product, id=request.POST["product_id"])
-    quantity = int(request.POST.get("quantity", 1))
-    OrderItem.objects.create(order=order, product=product, price=product.price, quantity=quantity)
+    if request.method == "POST":
+        order = get_object_or_404(Order, id=order_id)
+        product = get_object_or_404(Product, id=request.POST.get("product_id"))
+        quantity = int(request.POST.get("quantity", 1))
+
+        # Используем твое свойство из модели Product для получения цены
+        price = product.final_price
+
+        OrderItem.objects.create(
+            order=order, 
+            product=product, 
+            price=price, 
+            quantity=quantity
+        )
+        
+        # Сохраняем заказ для пересчета итогов
+        order.save() 
+        
     return redirect("orders:admin_edit_order", order.id)
