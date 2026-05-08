@@ -48,5 +48,7 @@ urlpatterns = [
     path("admin/reviews/", views.admin_reviews, name="admin_reviews"),
     path("admin/reviews/<int:pk>/approve/", views.admin_approve_review, name="admin_approve_review"),
     path("admin/reviews/<int:pk>/delete/", views.admin_delete_review, name="admin_delete_review"),
+    path("admin/statistics/", views.admin_statistics, name="admin_statistics")
+    
 ]
 

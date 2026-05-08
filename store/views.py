@@ -1,7 +1,7 @@
 # store/views.py
 from django.shortcuts import render, get_object_or_404,redirect
 from django.core.paginator import Paginator
-from django.db.models import Q,Count,Case, When, IntegerField
+from django.db.models import Q,Count,Case, When, IntegerField,Sum,DecimalField,ExpressionWrapper,F
 from .models import *
 from .forms import SearchForm
 from django.contrib.auth.decorators import login_required,user_passes_test
@@ -14,6 +14,11 @@ from cart.cart import Cart
 from django.views.decorators.http import require_POST
 from .chat_service import ask_gigachat
 import traceback
+from django.shortcuts import render
+from orders.models import Order
+from store.models import Product, ShopReview
+from users.models import CustomUser
+from django.db.models.functions import TruncDate
 
 def about_page(request):
     reviews = ShopReview.objects.filter(is_approved=True).annotate(
@@ -372,6 +377,80 @@ def admin_delete_review(request, pk):
     messages.success(request, "Отзыв удалён")
     return redirect("store:admin_reviews")
 
+
+def admin_statistics(request):
+
+    # --- ORDERS ---
+    orders = Order.objects.all()
+
+    total_orders = orders.count()
+
+    total_revenue = sum(o.total_price for o in orders)
+    total_final_revenue = sum(o.final_total_price for o in orders)
+
+    paid_orders = orders.filter(status="paid").count()
+    delivered_orders = orders.filter(status="delivered").count()
+    processing_orders = orders.filter(status="processing").count()
+
+    total_bonus_used = sum(o.bonus_used for o in orders)
+
+    # --- 📈 SALES BY DAY (БЕЗ ORM — СТАБИЛЬНО) ---
+    sales_by_day = {}
+
+    for order in orders:
+        day = order.created_at.date()
+        sales_by_day[day] = sales_by_day.get(day, 0) + float(order.final_total_price)
+
+    sorted_days = sorted(sales_by_day.keys())
+
+    dates = [d.strftime("%d.%m.%Y") for d in sorted_days]
+    sales = [sales_by_day[d] for d in sorted_days]
+
+    # --- USERS ---
+    total_users = CustomUser.objects.count()
+    users_with_bonus = CustomUser.objects.filter(bonus_points__gt=0).count()
+
+    # --- PRODUCTS ---
+    total_products = Product.objects.count()
+    active_products = Product.objects.filter(available=True).count()
+    out_of_stock = sum(1 for p in Product.objects.all() if p.is_out_of_stock)
+
+    # --- REVIEWS ---
+    total_reviews = ShopReview.objects.count()
+    approved_reviews = ShopReview.objects.filter(is_approved=True).count()
+    pending_reviews = ShopReview.objects.filter(is_approved=False).count()
+
+    # --- LAST ORDERS ---
+    last_orders = Order.objects.order_by("-created_at")[:10]
+
+    return render(request, "store/admin/statistics.html", {
+        "total_orders": total_orders,
+        "total_revenue": total_revenue,
+        "total_final_revenue": total_final_revenue,
+
+        "paid_orders": paid_orders,
+        "delivered_orders": delivered_orders,
+        "processing_orders": processing_orders,
+
+        "total_bonus_used": total_bonus_used,
+
+        "total_users": total_users,
+        "users_with_bonus": users_with_bonus,
+
+        "total_products": total_products,
+        "active_products": active_products,
+        "out_of_stock": out_of_stock,
+
+        "total_reviews": total_reviews,
+        "approved_reviews": approved_reviews,
+        "pending_reviews": pending_reviews,
+
+        "last_orders": last_orders,
+
+        # 📊 chart data
+        "dates": dates,
+        "sales": sales,
+    })
 
 @login_required
 def toggle_reaction(request, review_id):
