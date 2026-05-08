@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>SweetLand</title>
+  <title>Магазин Сладостей</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
@@ -34,7 +34,7 @@
     <div class="container mx-auto px-4 py-3 flex items-center justify-between">
       <a href="{% url 'home' %}" class="flex items-center gap-3 group">
         <div class="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform bg-[#FF9EAA] font-extrabold text-xl">S</div>
-        <h1 class="text-xl font-bold tracking-tight text-gray-800">SweetLand</h1>
+        <h1 class="text-xl font-bold tracking-tight text-gray-800">Магазин Сладостей</h1>
       </a>
 
       <form action="{% url 'store:product_list' %}" class="hidden md:block w-1/3 relative">
@@ -94,7 +94,7 @@
   <footer class="bg-white border-t border-pink-100">
     <div class="container mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-10">
       <div>
-        <h3 class="font-extrabold text-xl mb-4">SweetLand</h3>
+        <h3 class="font-extrabold text-xl mb-4">Магазин Сладостей</h3>
         <p class="text-sm text-gray-500 leading-relaxed">Онлайн-магазин сладостей со всего мира. Только качественные и оригинальные лакомства.</p>
       </div>
       <div>
@@ -109,11 +109,11 @@
       </div>
       <div>
         <h3 class="font-bold text-lg mb-4">Контакты</h3>
-        <p class="text-sm text-gray-500 italic">support@SweetLand.com</p>
+        <p class="text-sm text-gray-500 italic">supportsweet@gmail.com</p>
         <p class="font-bold text-gray-700 mt-2">+7 (900) 123-45-67</p>
       </div>
     </div>
-    <div class="border-t border-gray-50 py-6 text-center text-sm text-gray-400">© {{ now|date:"Y" }} SweetLand.</div>
+    <div class="border-t border-gray-50 py-6 text-center text-sm text-gray-400">© {{ now|date:"Y" }} Магазин Сладостей.</div>
   </footer>
 
   <!-- ================= AI CHAT (расширенный) ================= -->

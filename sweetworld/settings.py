@@ -78,7 +78,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "seredadanil944@gmail.com"
 EMAIL_HOST_PASSWORD = "yqnt ebob xppq jqex"
 
-DEFAULT_FROM_EMAIL = "SweetLand <support@sweetworld.com>"
+DEFAULT_FROM_EMAIL = "Магазин Сладостей <supportsweet@gmail.com>"
 
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Europe/Bucharest"
