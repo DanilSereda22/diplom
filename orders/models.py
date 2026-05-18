@@ -18,9 +18,7 @@ class Order(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name="orders"
     )
 
@@ -31,11 +29,25 @@ class Order(models.Model):
 
     delivery_method = models.CharField(max_length=20, choices=DELIVERY_CHOICES)
     delivery_address = models.CharField(max_length=255, blank=True)
-    delivery_comment = models.TextField(blank=True)
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="processing")
+    delivery_comment = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="processing"
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
-    bonus_used = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    bonus_used = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
 
     @property
     def total_price(self):
