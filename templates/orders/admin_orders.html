@@ -19,7 +19,7 @@
     <div class="flex justify-between items-start">
       <div>
         <div class="flex items-center gap-3">
-          <h2 class="font-bold text-lg">Заказ #{{ order.id }}</h2>
+          <h2 class="font-bold text-lg">Заказ #{{ order.order_number }}</h2>
 
           <span class="text-xs px-3 py-1 rounded-full
             {% if order.status == 'paid' %}

@@ -1,8 +1,10 @@
-# orders/models.py
 from django.db import models
 from django.conf import settings
 from store.models import Product
 from decimal import Decimal
+from django.db.models import Max
+from django.db import transaction
+
 
 class Order(models.Model):
     DELIVERY_CHOICES = (
@@ -30,10 +32,7 @@ class Order(models.Model):
     delivery_method = models.CharField(max_length=20, choices=DELIVERY_CHOICES)
     delivery_address = models.CharField(max_length=255, blank=True)
 
-    delivery_comment = models.TextField(
-        blank=True,
-        null=True
-    )
+    delivery_comment = models.TextField(blank=True, null=True)
 
     status = models.CharField(
         max_length=20,
@@ -49,6 +48,14 @@ class Order(models.Model):
         default=0
     )
 
+    # 🔥 НОВОЕ ПОЛЕ (красивый номер заказа)
+    order_number = models.PositiveIntegerField(
+        unique=True,
+        editable=False,
+        null=True,
+        blank=True
+    )
+
     @property
     def total_price(self):
         """Сумма всех товаров без учета бонусов"""
@@ -59,8 +66,25 @@ class Order(models.Model):
         """Сумма с учетом списанных бонусов"""
         return max(Decimal(0), self.total_price - self.bonus_used)
 
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            from django.db import transaction
+
+            with transaction.atomic():
+                existing = set(
+                    Order.objects.values_list("order_number", flat=True)
+                )
+
+                i = 1
+                while i in existing:
+                    i += 1
+
+                self.order_number = i
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Заказ #{self.id} ({self.get_status_display()})"
+        return f"Заказ #{self.order_number} ({self.get_status_display()})"
 
 
 class OrderItem(models.Model):
