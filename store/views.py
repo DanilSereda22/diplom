@@ -12,7 +12,13 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from cart.cart import Cart
 from django.views.decorators.http import require_POST
-from .chat_service import ask_gigachat
+from .chat_service import (
+    ask_gigachat,
+    extract_budget,
+    get_products_for_budget,
+    find_products_by_text,
+    get_gift_set
+)
 import traceback
 from django.shortcuts import render
 from orders.models import Order
@@ -595,6 +601,42 @@ def ai_chat(request):
 
             save_chat(request, message, response)
             return JsonResponse(response)
+        # =========================
+        # 🔥 СКИДКИ
+        # =========================
+
+        discount_words = [
+            "скидк",
+            "акци",
+            "дешев",
+            "выгод",
+            "распродаж"
+        ]
+
+        if any(word in message.lower() for word in discount_words):
+
+            items = get_discount_products()
+
+            if items:
+
+                response = {
+
+                    "mode": "discounts",
+
+                    "message": "🔥 Товары со скидками:",
+
+                    "items": items
+                }
+
+            else:
+
+                response = {
+                    "reply": "😔 Сейчас нет товаров со скидкой"
+                }
+
+            save_chat(request, message, response)
+
+            return JsonResponse(response)
 
         # =========================
         # 🛒 3. СБОР ИЗ ТЕКСТА
@@ -732,3 +774,36 @@ def ai_bulk_add_to_cart(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+# ================= СКИДКИ =================
+
+def get_discount_products():
+
+    from .models import Product
+
+    products = Product.objects.filter(
+        available=True,
+        stock__gt=0,
+        discount_percent__gt=0
+    ).order_by("-discount_percent")[:10]
+
+    result = []
+
+    for p in products:
+
+        result.append({
+            "slug": p.slug,
+            "name": p.name,
+
+            # старая цена
+            "old_price": float(p.old_price),
+
+            # новая цена
+            "price": float(p.final_price),
+
+            "discount_percent": p.discount_percent,
+
+            "quantity": 1
+        })
+
+    return result

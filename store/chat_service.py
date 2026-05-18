@@ -87,14 +87,14 @@ def get_products_for_budget(budget):
     result = []
 
     for p in products:
-        if total + p.price <= budget:
+        if total + p.final_price <= budget:
             result.append({
                 "slug": p.slug,
                 "name": p.name,
-                "price": float(p.price),
+                "price": float(p.final_price),
                 "quantity": 1
             })
-            total += p.price
+            total += p.final_price
 
     return result, total
 
