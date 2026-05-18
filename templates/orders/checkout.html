@@ -151,7 +151,7 @@
 
 <script>
 // Маска для телефона
-document.getElementById("id_phone")?.addEventListener("input", e => {
+document.getElementById("phone")?.addEventListener("input", e => {
   let v = e.target.value.replace(/\D/g,'');
   if (v.startsWith('7')) v = v.slice(1);
   if (v.startsWith('8')) v = v.slice(1);
